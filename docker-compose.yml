@@ -1,6 +1,23 @@
 version: '3.8'
 
 services:
+  # Serviço da nossa API (Backend)
+  api:
+    build: . # Manda o Docker construir a imagem usando o Dockerfile da mesma pasta
+    container_name: eventhub-api
+    ports:
+      - "8080:8080"
+    environment:
+      # Sobrescreve as configurações do application.properties com variáveis de ambiente
+      # Repare que na URL, usamos "db" (nome do serviço abaixo) em vez de "localhost"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/eventhub_db
+      SPRING_DATASOURCE_USERNAME: eventhub_user
+      SPRING_DATASOURCE_PASSWORD: eventhub_password
+    depends_on:
+      - db # Diz que a API só deve iniciar depois que o banco de dados iniciar
+    restart: unless-stopped
+
+  # Serviço do Banco de Dados
   db:
     image: postgres:16
     container_name: eventhub-db

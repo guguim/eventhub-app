@@ -12,10 +12,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity // Habilita a configuração de segurança Web para o Spring Boot
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final com.eventhub.api.security.JwtAuthenticationFilter jwtAuthFilter;
 
     // 1. Filtro Central de Segurança (A barreira de entrada da nossa API)
     @Bean
@@ -38,7 +43,8 @@ public class SecurityConfig {
                         // Bloqueamos qualquer outra rota (ex: /api/events). Só entra quem estiver autenticado!
                         .anyRequest().authenticated()
                 )
-                // Na próxima etapa, vamos encaixar o nosso filtro JWT aqui no meio para inspecionar os cabeçalhos!
+                // Encaixamos o nosso pedágio (Filtro JWT) antes do filtro padrão de Login do Spring!
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

@@ -3,6 +3,7 @@ package com.eventhub.api.service;
 import com.eventhub.api.dto.EventRequestDTO;
 import com.eventhub.api.dto.EventResponseDTO;
 import com.eventhub.api.model.Event;
+import com.eventhub.api.model.Role;
 import com.eventhub.api.model.User;
 import com.eventhub.api.repository.EventRepository;
 import com.eventhub.api.repository.UserRepository;
@@ -43,7 +44,7 @@ class EventServiceTest {
     void createEvent_Success() {
         // 1. Arrange (Preparar os dados e os Mocks)
         Long organizerId = 1L;
-        User mockUser = new User(organizerId, "João", "joao@email.com", "senha123");
+        User mockUser = new User(organizerId, "João", "joao@email.com", "senha123", Role.ORGANIZER);
         
         EventRequestDTO requestDTO = new EventRequestDTO(
                 "Churrasco", "Churras de fim de ano", "Casa do João", organizerId, List.of(LocalDateTime.now())

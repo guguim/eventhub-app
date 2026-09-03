@@ -10,6 +10,7 @@ import com.eventhub.api.repository.EventRepository;
 import com.eventhub.api.repository.TaskRepository;
 import com.eventhub.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // Método utilitário para pegar o usuário do Token (nosso truque de segurança!)
     private User getAuthenticatedUser() {
@@ -78,7 +80,12 @@ public class TaskService {
         task.setStatus(request.status());
         Task savedTask = taskRepository.save(task);
         
-        return mapToDTO(savedTask);
+        TaskResponseDTO responseDTO = mapToDTO(savedTask);
+        
+        // BROADCAST (Tempo Real): Grita no canal do WebSocket para atualizar a tela dos convidados!
+        messagingTemplate.convertAndSend("/topic/events/" + task.getEvent().getId() + "/tasks", responseDTO);
+        
+        return responseDTO;
     }
 
     // Utilitário para traduzir a Entidade (cheia de relacionamentos pesados) 

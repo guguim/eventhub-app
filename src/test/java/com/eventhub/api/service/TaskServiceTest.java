@@ -34,6 +34,9 @@ class TaskServiceTest {
 
     @Mock
     private UserRepository userRepository;
+    
+    @Mock
+    private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
 
     @InjectMocks
     private TaskService taskService;
@@ -61,6 +64,7 @@ class TaskServiceTest {
 
         mockTask = new Task();
         mockTask.setId(100L);
+        mockTask.setEvent(mockEvent); // Evita NullPointer ao pegar o ID do evento no Broadcast
     }
 
     @AfterEach

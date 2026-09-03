@@ -31,6 +31,9 @@ class VoteServiceTest {
 
     @Mock
     private EventDateOptionRepository dateOptionRepository;
+    
+    @Mock
+    private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
 
     @InjectMocks
     private VoteService voteService;
@@ -42,8 +45,13 @@ class VoteServiceTest {
     void setUp() {
         // 1. Criamos os dados fictícios
         mockUser = new User(1L, "João", "joao@email.com", "senha123", Role.GUEST);
+        
+        Event mockEvent = new Event();
+        mockEvent.setId(5L);
+        
         mockDateOption = new EventDateOption();
         mockDateOption.setId(10L);
+        mockDateOption.setEvent(mockEvent);
 
         // 2. TRUQUE MÁGICO: O nosso código roda pegando o usuário da sessão do Spring Security.
         // Como no teste unitário nós não temos um servidor web rodando e logando de verdade,

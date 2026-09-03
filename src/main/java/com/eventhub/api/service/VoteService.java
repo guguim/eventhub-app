@@ -7,6 +7,7 @@ import com.eventhub.api.model.Vote;
 import com.eventhub.api.repository.EventDateOptionRepository;
 import com.eventhub.api.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ public class VoteService {
 
     private final VoteRepository voteRepository;
     private final EventDateOptionRepository dateOptionRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public VoteResponseDTO castVote(Long dateOptionId) {
         // 1. Quem está votando? 
@@ -43,7 +45,12 @@ public class VoteService {
 
         // 5. Conta como ficou o total e devolve a resposta
         long totalVotes = voteRepository.countByEventDateOptionId(dateOptionId);
+        VoteResponseDTO responseDTO = new VoteResponseDTO(savedVote.getId(), "Voto computado com sucesso!", totalVotes);
 
-        return new VoteResponseDTO(savedVote.getId(), "Voto computado com sucesso!", totalVotes);
+        // 6. BROADCAST (Tempo Real): Avisa todos os clientes conectados ao túnel deste evento!
+        // A mensagem será enviada para o canal "/topic/events/{eventId}/votes"
+        messagingTemplate.convertAndSend("/topic/events/" + dateOption.getEvent().getId() + "/votes", responseDTO);
+
+        return responseDTO;
     }
 }

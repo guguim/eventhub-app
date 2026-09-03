@@ -1,6 +1,7 @@
 package com.eventhub.api.service;
 
 import com.eventhub.api.dto.VoteResponseDTO;
+import com.eventhub.api.model.Event;
 import com.eventhub.api.model.EventDateOption;
 import com.eventhub.api.model.Role;
 import com.eventhub.api.model.User;

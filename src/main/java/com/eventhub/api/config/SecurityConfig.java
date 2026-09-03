@@ -40,6 +40,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         
+                        // Libera a porta de entrada do WebSocket para qualquer um conseguir iniciar o túnel
+                        .requestMatchers("/ws/**").permitAll()
+                        
                         // Bloqueamos qualquer outra rota (ex: /api/events). Só entra quem estiver autenticado!
                         .anyRequest().authenticated()
                 )

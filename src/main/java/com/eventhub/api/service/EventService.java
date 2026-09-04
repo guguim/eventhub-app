@@ -20,6 +20,8 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
 
     // @Transactional garante que ou salva TUDO ou não salva NADA (rollback se der erro no meio)
     @Transactional
@@ -51,7 +53,28 @@ public class EventService {
         // 4. Salva no banco. Como usamos CascadeType.ALL, salvar o "Event" salva as "EventDateOption" juntas!
         Event savedEvent = eventRepository.save(event);
 
-        // 5. Retornamos o DTO de Response, protegendo as entidades
+        // 5. Integração com Notificações (Fase 6)
+        // Busca todos os usuários do banco (menos o organizador) para avisá-los.
+        // NOTA DIDÁTICA: Em produção, NUNCA faça disparos em massa de e-mail de forma "síncrona" (travando a requisição HTTP).
+        // A API demoraria minutos para responder. O correto é jogar numa fila (RabbitMQ/Kafka) ou usar @Async.
+        List<User> allUsers = userRepository.findAll();
+        for (User user : allUsers) {
+            if (!user.getId().equals(organizer.getId())) {
+                String message = "Novo evento criado: " + event.getTitle() + " por " + organizer.getName();
+                
+                // Dispara o Sininho (Salva no banco)
+                notificationService.createNotification(user, message);
+                
+                // Dispara o Email SMTP
+                emailService.sendSimpleEmail(
+                        user.getEmail(), 
+                        "Convite: " + event.getTitle(), 
+                        "Olá " + user.getName() + ",\n\nUm novo evento foi criado!\nDetalhes: " + event.getDescription()
+                );
+            }
+        }
+
+        // 6. Retornamos o DTO de Response, protegendo as entidades
         return convertToResponseDTO(savedEvent);
     }
 

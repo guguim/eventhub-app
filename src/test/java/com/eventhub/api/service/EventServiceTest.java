@@ -35,6 +35,12 @@ class EventServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private EmailService emailService;
+
     // O @InjectMocks vai pegar os mocks acima e injetar dentro do EventService, igual o Spring faz!
     @InjectMocks
     private EventService eventService;
@@ -55,6 +61,7 @@ class EventServiceTest {
         // Dizendo ao Mockito como reagir: "Quando o findById for chamado com o ID 1, retorne o mockUser"
         when(userRepository.findById(organizerId)).thenReturn(Optional.of(mockUser));
         when(eventRepository.save(any(Event.class))).thenReturn(mockSavedEvent);
+        when(userRepository.findAll()).thenReturn(List.of(mockUser)); // Retorna só o organizador, assim o loop de notificação é pulado
 
         // 2. Act (Executar o método que queremos testar)
         EventResponseDTO response = eventService.createEvent(requestDTO);

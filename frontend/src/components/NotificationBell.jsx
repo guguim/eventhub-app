@@ -12,7 +12,7 @@ const NotificationBell = () => {
   useEffect(() => {
     if (user) {
       fetchUnreadCount();
-      // Polling a cada 30 segundos para atualizar a bolinha vermelha!
+
       const interval = setInterval(fetchUnreadCount, 30000);
       return () => clearInterval(interval);
     }
@@ -29,7 +29,7 @@ const NotificationBell = () => {
 
   const openDropdown = async () => {
     setIsOpen(!isOpen);
-    // Se estiver abrindo o dropdown, vai no Java buscar os textos das notificações
+
     if (!isOpen) {
       try {
         const response = await axios.get('/api/notifications');
@@ -43,7 +43,7 @@ const NotificationBell = () => {
   const markAsRead = async (id) => {
     try {
       await axios.patch(`/api/notifications/${id}/read`);
-      // Atualiza a tela sem precisar perguntar pro Java novamente
+
       setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (e) {

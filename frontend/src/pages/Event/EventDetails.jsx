@@ -17,12 +17,12 @@ const EventDetails = () => {
   useEffect(() => {
     fetchEventData();
     const cleanupWebSocket = setupWebSocket();
-    return cleanupWebSocket; // Desconecta do socket quando o usuário fecha a página
+    return cleanupWebSocket; 
   }, [id]);
 
   const fetchEventData = async () => {
     try {
-      // Usamos o Promise.all para fazer o download das duas coisas ao mesmo tempo!
+
       const [eventRes, tasksRes] = await Promise.all([
         axios.get(`/api/events/${id}`),
         axios.get(`/api/events/${id}/tasks`)
@@ -39,24 +39,24 @@ const EventDetails = () => {
   };
 
   const setupWebSocket = () => {
-    // 💡 A MÁGICA DA FASE 5 COMEÇA AQUI!
+
     const client = new Client({
       brokerURL: 'ws://localhost:8080/ws', 
       reconnectDelay: 5000,
       onConnect: () => {
         console.log("Conectado ao Túnel WebSocket!");
-        
-        // 1. Ouvindo o Rádio de Votos
+
+
         client.subscribe(`/topic/events/${id}/votes`, (message) => {
           console.log("Alguém votou! Recarregando dados...");
-          fetchEventData(); // Recarrega os votos da tela
+          fetchEventData(); 
         });
 
-        // 2. Ouvindo o Rádio de Tarefas
+
         client.subscribe(`/topic/events/${id}/tasks`, (message) => {
           const taskData = JSON.parse(message.body);
           console.log("Uma tarefa mudou de status via WebSocket!", taskData);
-          // Substitui a tarefa velha pela nova na nossa tela em frações de segundo
+
           setTasks(prevTasks => prevTasks.map(t => t.id === taskData.id ? taskData : t));
         });
       }
@@ -68,9 +68,7 @@ const EventDetails = () => {
   const handleVote = async (dateOptionId) => {
     try {
       await axios.post(`/api/dates/${dateOptionId}/vote`);
-      // Perceba: NÃO CHAMAMOS o fetchEventData() aqui de propósito!
-      // Por que? Porque o nosso Backend Java vai gritar no WebSocket para todos na sala que um voto caiu,
-      // E o nosso 'client.subscribe' ali em cima vai escutar o grito e recarregar a tela automaticamente!
+
     } catch (e) {
       alert("Erro ao votar. Provavelmente você já votou nesta data!");
     }
@@ -91,7 +89,7 @@ const EventDetails = () => {
     try {
       await axios.post(`/api/events/${id}/tasks`, { title: newTaskTitle });
       setNewTaskTitle('');
-      // O WebSocket vai cuidar de recarregar a lista na tela automaticamente!
+
     } catch (e) {
       alert("Acesso Negado: Apenas o organizador pode adicionar tarefas!");
     }
@@ -109,7 +107,7 @@ const EventDetails = () => {
       <div className="glass-panel" style={{ padding: '2.5rem', marginBottom: '2rem' }}>
         <h1 style={{ color: 'var(--color-primary)', marginBottom: '0.5rem' }}>{event.title}</h1>
         <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '1.1rem' }}>{event.description}</p>
-        
+
         <div style={{ display: 'flex', gap: '2rem', color: 'var(--text-main)', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <MapPin size={20} style={{ color: 'var(--color-primary)' }}/> {event.location}
@@ -121,7 +119,7 @@ const EventDetails = () => {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
-        {/* LADO ESQUERDO: Datas */}
+        {}
         <div className="glass-panel" style={{ padding: '2rem' }}>
           <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Calendar size={24} /> Enquete de Datas
@@ -139,7 +137,7 @@ const EventDetails = () => {
           </div>
         </div>
 
-        {/* LADO DIREITO: Tarefas */}
+        {}
         <div className="glass-panel" style={{ padding: '2rem' }}>
           <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <CheckCircle size={24} /> Checklist de Tarefas

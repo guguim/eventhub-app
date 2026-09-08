@@ -10,19 +10,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/auth") // Lembra que nós liberamos "/api/auth/*" no SecurityConfig?
+@RequestMapping("/api/auth") 
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
 
-    // Rota pública para criar uma nova conta
+
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
         return ResponseEntity.ok(authService.register(request));
     }
 
-    // Rota pública para fazer login e pegar o Token JWT
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestDTO request) {
         return ResponseEntity.ok(authService.login(request));

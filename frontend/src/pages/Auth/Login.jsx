@@ -7,16 +7,16 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Impede o recarregamento "flicker" padrão do formulário
+    e.preventDefault(); 
     setError('');
     try {
       await login(email, password);
-      navigate('/dashboard'); // Se logou, vai pros eventos!
+      navigate('/dashboard'); 
     } catch (err) {
       setError('Credenciais inválidas. Tente novamente.');
     }
@@ -24,9 +24,9 @@ const Login = () => {
 
   return (
     <div className="container animate-fade-in" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-      {/* Aqui usamos o nosso Design System CSS puro: glass-panel */}
+      {}
       <div className="glass-panel" style={{ padding: '2.5rem', width: '100%', maxWidth: '400px' }}>
-        
+
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <h2>Bem-vindo de volta!</h2>
           <p style={{ color: 'var(--text-muted)' }}>Faça login no EventHub</p>
@@ -45,7 +45,7 @@ const Login = () => {
               placeholder="seu@email.com"
             />
           </div>
-          
+
           <div className="input-group">
             <label>Senha</label>
             <input 

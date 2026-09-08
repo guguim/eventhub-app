@@ -14,10 +14,7 @@ public class VoteController {
 
     private final VoteService voteService;
 
-    // Rota: POST /api/dates/{id}/vote
-    // Como nós protegemos tudo no SecurityConfig, essa rota JÁ ESTÁ SEGURA!
-    // Se alguém sem o JWT tentar acessar, o Spring vai dar um "Pé na porta" (Erro 401)
-    // antes mesmo do código abaixo ser executado.
+
     @PostMapping("/{dateId}/vote")
     public ResponseEntity<VoteResponseDTO> voteForDate(@PathVariable Long dateId) {
         VoteResponseDTO response = voteService.castVote(dateId);

@@ -18,7 +18,7 @@ const CreateEvent = () => {
     e.preventDefault();
     setError('');
 
-    // Prepara o formato das datas para enviar pro Java
+
     const dateOptions = [];
     if (date1) dateOptions.push(new Date(date1).toISOString().slice(0, 19));
     if (date2) dateOptions.push(new Date(date2).toISOString().slice(0, 19));
@@ -29,16 +29,15 @@ const CreateEvent = () => {
     }
 
     try {
-      // POST com os dados do evento! Como estamos usando Axios via Context, 
-      // o Token JWT (que diz que VOCÊ é o organizador) já vai embutido.
+
       const response = await axios.post('/api/events', {
         title,
         description,
         location,
-        organizerId: user.id, // O Backend Java (Fase 1) exige saber quem é o organizador!
+        organizerId: user.id, 
         dateOptions
       });
-      // Navega direto para a tela de detalhes do evento recém-criado
+
       navigate(`/eventos/${response.data.id}`);
     } catch (err) {
       setError('Erro ao criar evento. Verifique os dados.');
@@ -53,7 +52,7 @@ const CreateEvent = () => {
 
       <div className="glass-panel" style={{ padding: '2.5rem', maxWidth: '600px', margin: '0 auto' }}>
         <h2 style={{ marginBottom: '1.5rem', color: 'var(--color-primary)' }}>Criar Novo Evento</h2>
-        
+
         {error && <div style={{ color: '#ff6b6b', marginBottom: '1rem', fontWeight: '500' }}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
@@ -76,7 +75,7 @@ const CreateEvent = () => {
             <Calendar size={20} /> Datas Propostas
           </h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>Sugira até 2 opções para a galera votar!</p>
-          
+
           <div className="input-group">
             <label>Opção de Data 1</label>
             <input type="datetime-local" required value={date1} onChange={e => setDate1(e.target.value)} />

@@ -25,21 +25,20 @@ public class Task {
 
     private String description;
 
-    // Prazo para cumprir a tarefa (opcional)
+
     private LocalDateTime deadline;
 
-    // Toda tarefa nasce com o status PENDENTE por padrão
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TaskStatus status = TaskStatus.PENDING;
 
-    // Relacionamento: Muitas Tarefas pertencem a Um Evento
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
-    // Relacionamento: Muitas Tarefas podem ter o mesmo Usuário como responsável.
-    // Perceba que NÃO colocamos "nullable = false", ou seja, a tarefa pode nascer "órfã" (sem dono).
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignee_id")
     private User assignee;

@@ -10,5 +10,5 @@ public record TaskResponseDTO(
     LocalDateTime deadline,
     TaskStatus status,
     Long assigneeId,
-    String assigneeName // Útil para o frontend mostrar "Responsável: João" sem precisar fazer outra chamada
+    String assigneeName 
 ) {}

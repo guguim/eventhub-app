@@ -19,7 +19,7 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    // Rota: POST /api/events/{eventId}/tasks
+
     @PostMapping("/events/{eventId}/tasks")
     public ResponseEntity<TaskResponseDTO> createTask(
             @PathVariable Long eventId,
@@ -27,14 +27,13 @@ public class TaskController {
         return new ResponseEntity<>(taskService.createTask(eventId, request), HttpStatus.CREATED);
     }
 
-    // Rota: GET /api/events/{eventId}/tasks
+
     @GetMapping("/events/{eventId}/tasks")
     public ResponseEntity<List<TaskResponseDTO>> getTasksByEvent(@PathVariable Long eventId) {
         return ResponseEntity.ok(taskService.getTasksByEvent(eventId));
     }
 
-    // Rota: PATCH /api/tasks/{taskId}/status
-    // Usamos PATCH em vez de PUT porque estamos atualizando apenas um campinho específico (o status)
+
     @PatchMapping("/tasks/{taskId}/status")
     public ResponseEntity<TaskResponseDTO> updateTaskStatus(
             @PathVariable Long taskId,

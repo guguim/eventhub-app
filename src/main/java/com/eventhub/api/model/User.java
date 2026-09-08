@@ -33,27 +33,25 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING) // Salva no banco de dados como texto ("ORGANIZER") e não como número (0)
+    @Enumerated(EnumType.STRING) 
     @Column(nullable = false)
     private Role role;
 
-    // --- Métodos obrigatórios da interface UserDetails do Spring Security ---
 
-    // Este método diz pro Spring quais são os papéis do usuário. 
-    // O Spring exige o prefixo "ROLE_" para funcionar direitinho com anotações de autorização
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
-    // No Spring Security, o "username" é a chave única de login. Para nós, é o e-mail!
+
     @Override
     public String getUsername() {
         return this.email;
     }
 
-    // Os métodos abaixo poderiam ter lógica de bloqueio de conta.
-    // Como não teremos isso, vamos retornar "true" (conta ativa e desbloqueada) para todos.
+
     @Override
     public boolean isAccountNonExpired() {
         return true;

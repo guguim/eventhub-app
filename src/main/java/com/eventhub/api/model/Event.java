@@ -27,13 +27,12 @@ public class Event {
 
     private String location;
 
-    // Relacionamento Muitos-para-Um: Muitos eventos podem ter sido criados (organizados) por um mesmo usuário (User)
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organizer_id", nullable = false)
     private User organizer;
 
-    // Relacionamento Um-para-Muitos: Um evento pode ter várias opções de datas para votação
-    // CascadeType.ALL e orphanRemoval=true garantem que se o evento for apagado, as opções de data também serão
+
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventDateOption> dateOptions = new ArrayList<>();
 }

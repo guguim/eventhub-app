@@ -26,7 +26,7 @@ public class TaskService {
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    // Método utilitário para pegar o usuário do Token (nosso truque de segurança!)
+
     private User getAuthenticatedUser() {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
@@ -36,8 +36,7 @@ public class TaskService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Evento não encontrado."));
 
-        // 1ª REGRA DE AUTORIZAÇÃO (Object-Level Security)
-        // Só deixamos passar se o ID do organizador do evento for IGUAL ao ID do cara logado no Token
+
         if (!event.getOrganizer().getId().equals(loggedUser.getId())) {
             throw new RuntimeException("Acesso negado: Somente o organizador do evento pode criar tarefas.");
         }
@@ -48,7 +47,7 @@ public class TaskService {
         task.setDeadline(request.deadline());
         task.setEvent(event);
 
-        // Se ele mandou um responsável no JSON, nós buscamos no banco e conectamos na Tarefa
+
         if (request.assigneeId() != null) {
             User assignee = userRepository.findById(request.assigneeId())
                     .orElseThrow(() -> new RuntimeException("Usuário responsável não encontrado."));
@@ -60,7 +59,7 @@ public class TaskService {
     }
 
     public List<TaskResponseDTO> getTasksByEvent(Long eventId) {
-        // Busca todas do banco, converte uma por uma de Entidade para DTO e devolve a lista
+
         return taskRepository.findByEventId(eventId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
@@ -71,29 +70,27 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
 
-        // 2ª REGRA DE AUTORIZAÇÃO
-        // Só deixamos passar se o dono da tarefa existir E for IGUAL ao cara logado no Token
+
         if (task.getAssignee() == null || !task.getAssignee().getId().equals(loggedUser.getId())) {
             throw new RuntimeException("Acesso negado: Somente o responsável pela tarefa pode alterar o seu status.");
         }
 
         task.setStatus(request.status());
         Task savedTask = taskRepository.save(task);
-        
+
         TaskResponseDTO responseDTO = mapToDTO(savedTask);
-        
-        // BROADCAST (Tempo Real): Grita no canal do WebSocket para atualizar a tela dos convidados!
+
+
         messagingTemplate.convertAndSend("/topic/events/" + task.getEvent().getId() + "/tasks", responseDTO);
-        
+
         return responseDTO;
     }
 
-    // Utilitário para traduzir a Entidade (cheia de relacionamentos pesados) 
-    // para um DTO levinho só com os dados que o React precisa.
+
     private TaskResponseDTO mapToDTO(Task task) {
         Long assigneeId = task.getAssignee() != null ? task.getAssignee().getId() : null;
         String assigneeName = task.getAssignee() != null ? task.getAssignee().getName() : null;
-        
+
         return new TaskResponseDTO(
                 task.getId(),
                 task.getTitle(),

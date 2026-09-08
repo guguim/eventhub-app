@@ -1,14 +1,14 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
-// Criação do Contexto
+
 const AuthContext = createContext();
 
-// Hook personalizado para os componentes acessarem facilmente: const { user, login } = useAuth();
+
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  // Tenta pegar o token do "cofre" do navegador (localStorage) quando o App inicia
+
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('userData');
@@ -16,8 +16,7 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
 
-  // Esse 'useEffect' observa a variável 'token'. Sempre que ela mudar (alguém fez login ou logout),
-  // ele atualiza o cofre e coloca/tira o Token do cabeçalho de TODAS as futuras requisições do Axios!
+
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
@@ -31,17 +30,17 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, [token]);
 
-  // Função que será chamada pela tela de Login
+
   const login = async (email, password) => {
     try {
       const response = await axios.post('/api/auth/login', { email, password });
-      setToken(response.data.token); // Salva o token mágico no estado!
-      
-      // Salva os dados extras do usuário
+      setToken(response.data.token); 
+
+
       const userData = { id: response.data.userId, name: response.data.name };
       localStorage.setItem('userData', JSON.stringify(userData));
       setUser({ token: response.data.token, ...userData });
-      
+
       return true;
     } catch (error) {
       console.error("Falha no login", error);
@@ -52,7 +51,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     try {
       await axios.post('/api/auth/register', { name, email, password, role: 'ORGANIZER' });
-      // Se registrar com sucesso, já faz o login automático!
+
       return await login(email, password);
     } catch (error) {
       console.error("Falha no registro", error);

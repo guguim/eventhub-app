@@ -20,20 +20,19 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // O texto que vai aparecer no "sininho" do usuário
+
     @Column(nullable = false)
     private String message; 
 
-    // Controle para saber se a notificação já foi clicada/lida
+
     @Column(nullable = false)
     private boolean isRead = false; 
 
-    // Registra o exato milissegundo em que a notificação foi gerada
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // A quem essa notificação pertence? 
-    // Muitas notificações (Many) podem pertencer a Um (One) Usuário.
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

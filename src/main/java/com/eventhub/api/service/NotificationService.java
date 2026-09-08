@@ -21,9 +21,7 @@ public class NotificationService {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
-    // 1. GERAÇÃO (Uso Interno)
-    // Esse método não será exposto para a Web. Será chamado pelos nossos outros Services (ex: EventService) 
-    // quando eles quiserem gerar uma notificação no banco para um usuário.
+
     public void createNotification(User user, String message) {
         Notification notification = new Notification();
         notification.setUser(user);
@@ -31,8 +29,7 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    // 2. LEITURA (Para o Frontend)
-    // Pega as notificações apenas de quem estiver com o Token JWT ativo no momento da requisição.
+
     public List<NotificationResponseDTO> getMyNotifications() {
         User loggedUser = getAuthenticatedUser();
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(loggedUser.getId())
@@ -41,20 +38,20 @@ public class NotificationService {
                 .collect(Collectors.toList());
     }
 
-    // 3. CONTAGEM (Bolinha vermelha no sino)
+
     public long getUnreadCount() {
         User loggedUser = getAuthenticatedUser();
         return notificationRepository.countByUserIdAndIsReadFalse(loggedUser.getId());
     }
 
-    // 4. ATUALIZAÇÃO (Marcar como lida)
+
     public void markAsRead(Long notificationId) {
         User loggedUser = getAuthenticatedUser();
-        
+
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new RuntimeException("Notificação não encontrada."));
 
-        // Object-Level Security: Um usuário não pode marcar a notificação do outro como lida.
+
         if (!notification.getUser().getId().equals(loggedUser.getId())) {
             throw new RuntimeException("Acesso negado: Esta notificação não pertence a você.");
         }

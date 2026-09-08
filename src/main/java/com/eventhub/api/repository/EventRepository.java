@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
-    // JpaRepository já nos dá métodos como save(), findById(), findAll(), deleteById() de graça!
+
 }

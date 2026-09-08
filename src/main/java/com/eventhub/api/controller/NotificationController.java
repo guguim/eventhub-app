@@ -16,23 +16,23 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    // Retorna a lista completa para montar a interface do dropdown do sininho
+
     @GetMapping
     public ResponseEntity<List<NotificationResponseDTO>> getMyNotifications() {
         return ResponseEntity.ok(notificationService.getMyNotifications());
     }
 
-    // Rota pequenininha e leve, só para buscar o número de bolinhas vermelhas
+
     @GetMapping("/unread-count")
     public ResponseEntity<Map<String, Long>> getUnreadCount() {
         long count = notificationService.getUnreadCount();
         return ResponseEntity.ok(Map.of("unreadCount", count));
     }
 
-    // PATCH: atualiza apenas o estado de "isRead" para true
+
     @PatchMapping("/{id}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable Long id) {
         notificationService.markAsRead(id);
-        return ResponseEntity.noContent().build(); // Retorna Status 204 No Content (Deu certo, mas não tenho JSON pra devolver)
+        return ResponseEntity.noContent().build(); 
     }
 }

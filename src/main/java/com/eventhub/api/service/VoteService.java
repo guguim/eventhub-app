@@ -20,35 +20,31 @@ public class VoteService {
     private final SimpMessagingTemplate messagingTemplate;
 
     public VoteResponseDTO castVote(Long dateOptionId) {
-        // 1. Quem está votando? 
-        // Em vez de receber o ID do usuário no Request Body (o que permitiria fraudes, como você enviar o ID do seu amigo),
-        // nós pegamos o usuário que está autenticado AGORA na memória do Spring Security, extraído direto do Token JWT criptografado!
+
         User authenticatedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        // 2. A data que ele está tentando curtir realmente existe?
+
         EventDateOption dateOption = dateOptionRepository.findById(dateOptionId)
                 .orElseThrow(() -> new RuntimeException("Opção de data não encontrada."));
 
-        // 3. Regra Anti-Fraude:
-        // Usa aquele método que criamos no Repository para ver se o cara já votou aqui.
+
         boolean alreadyVoted = voteRepository.existsByUserIdAndEventDateOptionId(authenticatedUser.getId(), dateOptionId);
         if (alreadyVoted) {
             throw new RuntimeException("Você já votou nesta data!");
         }
 
-        // 4. Cria e salva o voto
+
         Vote vote = new Vote();
         vote.setUser(authenticatedUser);
         vote.setEventDateOption(dateOption);
-        
+
         Vote savedVote = voteRepository.save(vote);
 
-        // 5. Conta como ficou o total e devolve a resposta
+
         long totalVotes = voteRepository.countByEventDateOptionId(dateOptionId);
         VoteResponseDTO responseDTO = new VoteResponseDTO(savedVote.getId(), "Voto computado com sucesso!", totalVotes);
 
-        // 6. BROADCAST (Tempo Real): Avisa todos os clientes conectados ao túnel deste evento!
-        // A mensagem será enviada para o canal "/topic/events/{eventId}/votes"
+
         messagingTemplate.convertAndSend("/topic/events/" + dateOption.getEvent().getId() + "/votes", responseDTO);
 
         return responseDTO;

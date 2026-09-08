@@ -11,14 +11,14 @@ const Dashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  // Quando a página carregar, puxamos os dados do Backend Java
+
   useEffect(() => {
     fetchEvents();
   }, []);
 
   const fetchEvents = async () => {
     try {
-      // Repare como é simples! O axios automaticamente coloca o Token JWT no cabeçalho aqui.
+
       const response = await axios.get('/api/events');
       setEvents(response.data);
     } catch (error) {
@@ -50,14 +50,14 @@ const Dashboard = () => {
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Buscando eventos no servidor...</div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-          
+
           {events.length === 0 ? (
             <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center', gridColumn: '1 / -1' }}>
               <h3 style={{ marginBottom: '1rem' }}>Nenhum evento encontrado</h3>
               <p style={{ color: 'var(--text-muted)' }}>A plataforma está vazia. Seja o primeiro a organizar algo incrível!</p>
             </div>
           ) : (
-            // Desenhando os Cards (Cartões) para cada evento retornado pelo Java
+
             events.map(event => (
               <Link to={`/eventos/${event.id}`} key={event.id} style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div 
@@ -76,7 +76,7 @@ const Dashboard = () => {
                   <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {event.description}
                   </p>
-                  
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontSize: '0.85rem' }}>
                       <User size={16} style={{ color: 'var(--color-primary)' }}/>

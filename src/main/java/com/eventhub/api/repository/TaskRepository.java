@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
-    
-    // Método mágico do Spring Data para buscar todas as tarefas de um único evento
+
+
     List<Task> findByEventId(Long eventId);
 }

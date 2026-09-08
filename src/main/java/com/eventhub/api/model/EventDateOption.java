@@ -19,7 +19,7 @@ public class EventDateOption {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // O lado "Muitos" costuma ser o dono do relacionamento no banco, ou seja, tem a chave estrangeira (event_id)
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;

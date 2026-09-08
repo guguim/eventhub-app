@@ -34,7 +34,7 @@ class TaskServiceTest {
 
     @Mock
     private UserRepository userRepository;
-    
+
     @Mock
     private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
 
@@ -48,13 +48,13 @@ class TaskServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Usuário logado simulado (Crachá ativo)
+
         loggedUser = new User(1L, "Usuário Logado", "logado@email.com", "senha", Role.GUEST);
-        
-        // Outro usuário qualquer
+
+
         otherUser = new User(2L, "Outro Usuário", "outro@email.com", "senha", Role.GUEST);
 
-        // Injeta o crachá na memória do teste
+
         UsernamePasswordAuthenticationToken authToken = 
                 new UsernamePasswordAuthenticationToken(loggedUser, null, loggedUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -64,7 +64,7 @@ class TaskServiceTest {
 
         mockTask = new Task();
         mockTask.setId(100L);
-        mockTask.setEvent(mockEvent); // Evita NullPointer ao pegar o ID do evento no Broadcast
+        mockTask.setEvent(mockEvent); 
     }
 
     @AfterEach
@@ -74,36 +74,36 @@ class TaskServiceTest {
 
     @Test
     void createTask_ThrowsException_WhenLoggedUserIsNotTheOrganizer() {
-        // 1. CUIDADO: O organizador do evento é o "otherUser", mas quem está tentando criar a tarefa é o "loggedUser"!
+
         mockEvent.setOrganizer(otherUser);
         when(eventRepository.findById(10L)).thenReturn(Optional.of(mockEvent));
 
         TaskRequestDTO request = new TaskRequestDTO("Comprar bolo", null, null, null);
 
-        // 2. Tenta criar e espera que estoure o erro de segurança
+
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             taskService.createTask(10L, request);
         });
 
-        // 3. Verifica se a porta foi fechada com o aviso correto
+
         assertEquals("Acesso negado: Somente o organizador do evento pode criar tarefas.", exception.getMessage());
         verify(taskRepository, never()).save(any(Task.class));
     }
 
     @Test
     void updateTaskStatus_ThrowsException_WhenLoggedUserIsNotTheAssignee() {
-        // 1. CUIDADO: O responsável pela tarefa é o "otherUser", mas quem tá tentando mudar o status é o "loggedUser"!
+
         mockTask.setAssignee(otherUser);
         when(taskRepository.findById(100L)).thenReturn(Optional.of(mockTask));
 
         TaskStatusUpdateDTO request = new TaskStatusUpdateDTO(TaskStatus.COMPLETED);
 
-        // 2. Tenta burlar o sistema
+
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             taskService.updateTaskStatus(100L, request);
         });
 
-        // 3. Garantimos que a nossa Object-Level Security funcionou perfeitamente
+
         assertEquals("Acesso negado: Somente o responsável pela tarefa pode alterar o seu status.", exception.getMessage());
         verify(taskRepository, never()).save(any(Task.class));
     }

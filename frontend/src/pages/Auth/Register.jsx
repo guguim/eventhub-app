@@ -8,7 +8,7 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  
+
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -16,7 +16,7 @@ const Register = () => {
     e.preventDefault();
     setError('');
     try {
-      // Nosso AuthContext faz o registro no Backend e, se sucesso, já loga automaticamente!
+
       await register(name, email, password);
       navigate('/dashboard'); 
     } catch (err) {
@@ -27,7 +27,7 @@ const Register = () => {
   return (
     <div className="container animate-fade-in" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
       <div className="glass-panel" style={{ padding: '2.5rem', width: '100%', maxWidth: '400px' }}>
-        
+
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <h2>Crie sua Conta</h2>
           <p style={{ color: 'var(--text-muted)' }}>Junte-se à revolução dos eventos</p>
@@ -57,7 +57,7 @@ const Register = () => {
               placeholder="seu@email.com"
             />
           </div>
-          
+
           <div className="input-group">
             <label>Senha Segura</label>
             <input 

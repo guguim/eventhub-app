@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, LogOut, Plus, User } from 'lucide-react';
 import NotificationBell from '../../components/NotificationBell';
 
@@ -9,6 +9,7 @@ const Dashboard = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   // Quando a página carregar, puxamos os dados do Backend Java
   useEffect(() => {
@@ -34,9 +35,9 @@ const Dashboard = () => {
           <h1>Dashboard</h1>
           <p style={{ color: 'var(--text-muted)' }}>Descubra ou organize os próximos encontros.</p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <NotificationBell />
-          <button className="btn-primary" onClick={() => alert("A tela de criação virá em uma próxima etapa de polimento!")}>
+          <button className="btn-primary" onClick={() => navigate('/novo-evento')}>
             <Plus size={20} /> Novo Evento
           </button>
           <button className="btn-glass" onClick={logout} title="Sair do Sistema">

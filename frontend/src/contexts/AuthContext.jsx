@@ -1,9 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
-// Define a URL base para todas as chamadas HTTP do nosso Frontend para o nosso Backend Java!
-axios.defaults.baseURL = 'http://localhost:8080';
-
 // Criação do Contexto
 const AuthContext = createContext();
 

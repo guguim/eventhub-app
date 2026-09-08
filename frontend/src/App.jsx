@@ -6,6 +6,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 // Importação das Páginas
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
+import Dashboard from './pages/Dashboard/Dashboard';
 
 function App() {
   return (
@@ -26,11 +27,7 @@ function App() {
             path="/dashboard" 
             element={
               <ProtectedRoute>
-                <div className="container animate-fade-in" style={{textAlign: 'center', marginTop: '20vh'}}>
-                  <h1>🎉 Acesso Concedido!</h1>
-                  <p style={{color: 'var(--color-primary)'}}>O seu Token JWT foi aceito. Você está no Dashboard Protegido.</p>
-                  <p style={{marginTop: '1rem', color: 'var(--text-muted)'}}>Em breve substituiremos isso pela listagem de eventos.</p>
-                </div>
+                <Dashboard />
               </ProtectedRoute>
             } 
           />

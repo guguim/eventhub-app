@@ -10,7 +10,10 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   // Tenta pegar o token do "cofre" do navegador (localStorage) quando o App inicia
   const [token, setToken] = useState(localStorage.getItem('token') || null);
-  const [user, setUser] = useState(token ? { token } : null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('userData');
+    return saved ? { token, ...JSON.parse(saved) } : (token ? { token } : null);
+  });
   const [loading, setLoading] = useState(true);
 
   // Esse 'useEffect' observa a variável 'token'. Sempre que ela mudar (alguém fez login ou logout),
@@ -19,9 +22,9 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser({ token });
     } else {
       localStorage.removeItem('token');
+      localStorage.removeItem('userData');
       delete axios.defaults.headers.common['Authorization'];
       setUser(null);
     }
@@ -33,6 +36,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post('/api/auth/login', { email, password });
       setToken(response.data.token); // Salva o token mágico no estado!
+      
+      // Salva os dados extras do usuário
+      const userData = { id: response.data.userId, name: response.data.name };
+      localStorage.setItem('userData', JSON.stringify(userData));
+      setUser({ token: response.data.token, ...userData });
+      
       return true;
     } catch (error) {
       console.error("Falha no login", error);
@@ -42,7 +51,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     try {
-      await axios.post('/api/auth/register', { name, email, password });
+      await axios.post('/api/auth/register', { name, email, password, role: 'ORGANIZER' });
       // Se registrar com sucesso, já faz o login automático!
       return await login(email, password);
     } catch (error) {

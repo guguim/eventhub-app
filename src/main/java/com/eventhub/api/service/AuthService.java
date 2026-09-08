@@ -42,7 +42,7 @@ public class AuthService {
         // Gera o token para o novo usuário já sair logado!
         String jwtToken = jwtService.generateToken(user);
         
-        return new AuthResponseDTO(jwtToken);
+        return new AuthResponseDTO(jwtToken, user.getId(), user.getName());
     }
 
     public AuthResponseDTO login(AuthRequestDTO request) {
@@ -64,6 +64,6 @@ public class AuthService {
 
         String jwtToken = jwtService.generateToken(user);
         
-        return new AuthResponseDTO(jwtToken);
+        return new AuthResponseDTO(jwtToken, user.getId(), user.getName());
     }
 }

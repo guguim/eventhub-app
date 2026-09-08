@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Calendar, Plus } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const CreateEvent = () => {
   const [title, setTitle] = useState('');
@@ -10,6 +11,7 @@ const CreateEvent = () => {
   const [date1, setDate1] = useState('');
   const [date2, setDate2] = useState('');
   const [error, setError] = useState('');
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -18,8 +20,8 @@ const CreateEvent = () => {
 
     // Prepara o formato das datas para enviar pro Java
     const dateOptions = [];
-    if (date1) dateOptions.push({ dateTime: new Date(date1).toISOString().slice(0, 19) });
-    if (date2) dateOptions.push({ dateTime: new Date(date2).toISOString().slice(0, 19) });
+    if (date1) dateOptions.push(new Date(date1).toISOString().slice(0, 19));
+    if (date2) dateOptions.push(new Date(date2).toISOString().slice(0, 19));
 
     if (dateOptions.length === 0) {
       setError("Forneça pelo menos uma data para o evento.");
@@ -33,6 +35,7 @@ const CreateEvent = () => {
         title,
         description,
         location,
+        organizerId: user.id, // O Backend Java (Fase 1) exige saber quem é o organizador!
         dateOptions
       });
       // Navega direto para a tela de detalhes do evento recém-criado

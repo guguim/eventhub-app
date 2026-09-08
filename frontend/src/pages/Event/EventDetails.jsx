@@ -10,6 +10,7 @@ const EventDetails = () => {
   const [event, setEvent] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -66,7 +67,7 @@ const EventDetails = () => {
 
   const handleVote = async (dateOptionId) => {
     try {
-      await axios.post(`/api/votes`, null, { params: { dateOptionId } });
+      await axios.post(`/api/dates/${dateOptionId}/vote`);
       // Perceba: NÃO CHAMAMOS o fetchEventData() aqui de propósito!
       // Por que? Porque o nosso Backend Java vai gritar no WebSocket para todos na sala que um voto caiu,
       // E o nosso 'client.subscribe' ali em cima vai escutar o grito e recarregar a tela automaticamente!
@@ -81,6 +82,18 @@ const EventDetails = () => {
       await axios.patch(`/api/tasks/${task.id}/status`, { status: newStatus });
     } catch (e) {
       alert("⚠️ Acesso Negado: Nosso Java Object-Level Security (Fase 4) bloqueou você. Apenas o organizador do evento ou o responsável pela tarefa podem alterá-la.");
+    }
+  };
+
+  const handleCreateTask = async (e) => {
+    e.preventDefault();
+    if (!newTaskTitle.trim()) return;
+    try {
+      await axios.post(`/api/events/${id}/tasks`, { title: newTaskTitle });
+      setNewTaskTitle('');
+      // O WebSocket vai cuidar de recarregar a lista na tela automaticamente!
+    } catch (e) {
+      alert("Acesso Negado: Apenas o organizador pode adicionar tarefas!");
     }
   };
 
@@ -131,6 +144,18 @@ const EventDetails = () => {
           <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <CheckCircle size={24} /> Checklist de Tarefas
           </h2>
+
+          <form onSubmit={handleCreateTask} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+            <input 
+              type="text" 
+              placeholder="Adicionar nova tarefa..." 
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'hsla(0,0%,0%,0.2)', color: 'var(--text-main)' }}
+            />
+            <button type="submit" className="btn-primary" style={{ padding: '0.75rem 1rem' }}>Adicionar</button>
+          </form>
+
           {tasks.length === 0 ? (
             <p style={{ color: 'var(--text-muted)' }}>Nenhuma tarefa cadastrada ainda.</p>
           ) : (

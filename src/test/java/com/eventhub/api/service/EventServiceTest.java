@@ -41,6 +41,9 @@ class EventServiceTest {
     @Mock
     private EmailService emailService;
 
+    @Mock
+    private com.eventhub.api.repository.VoteRepository voteRepository;
+
     // O @InjectMocks vai pegar os mocks acima e injetar dentro do EventService, igual o Spring faz!
     @InjectMocks
     private EventService eventService;

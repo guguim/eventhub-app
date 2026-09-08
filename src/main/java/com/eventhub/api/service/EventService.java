@@ -8,6 +8,7 @@ import com.eventhub.api.model.EventDateOption;
 import com.eventhub.api.model.User;
 import com.eventhub.api.repository.EventRepository;
 import com.eventhub.api.repository.UserRepository;
+import com.eventhub.api.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ public class EventService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final EmailService emailService;
+    private final VoteRepository voteRepository;
 
     // @Transactional garante que ou salva TUDO ou não salva NADA (rollback se der erro no meio)
     @Transactional
@@ -85,10 +87,21 @@ public class EventService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public EventResponseDTO getEventById(Long id) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
+        return convertToResponseDTO(event);
+    }
+
     // Método auxiliar (privado) para não repetir código de conversão
     private EventResponseDTO convertToResponseDTO(Event event) {
         List<EventDateOptionDTO> dateOptionDTOs = event.getDateOptions().stream()
-                .map(opt -> new EventDateOptionDTO(opt.getId(), opt.getDateTime()))
+                .map(opt -> new EventDateOptionDTO(
+                        opt.getId(), 
+                        opt.getDateTime(),
+                        voteRepository.countByEventDateOptionId(opt.getId()) // Conta votos no banco
+                ))
                 .toList();
 
         return new EventResponseDTO(

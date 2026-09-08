@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin, LogOut, Plus, User } from 'lucide-react';
+import NotificationBell from '../../components/NotificationBell';
 
 const Dashboard = () => {
   const [events, setEvents] = useState([]);
@@ -33,7 +34,8 @@ const Dashboard = () => {
           <h1>Dashboard</h1>
           <p style={{ color: 'var(--text-muted)' }}>Descubra ou organize os próximos encontros.</p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <NotificationBell />
           <button className="btn-primary" onClick={() => alert("A tela de criação virá em uma próxima etapa de polimento!")}>
             <Plus size={20} /> Novo Evento
           </button>

@@ -7,6 +7,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import Dashboard from './pages/Dashboard/Dashboard';
+import EventDetails from './pages/Event/EventDetails';
 
 function App() {
   return (
@@ -28,6 +29,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/eventos/:id" 
+            element={
+              <ProtectedRoute>
+                <EventDetails />
               </ProtectedRoute>
             } 
           />

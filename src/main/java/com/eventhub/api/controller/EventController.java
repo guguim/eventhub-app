@@ -31,4 +31,10 @@ public class EventController {
     public ResponseEntity<List<EventResponseDTO>> getAllEvents() {
         return ResponseEntity.ok(eventService.getAllEvents()); // HTTP 200 (OK)
     }
+
+    // Recebe GET em /api/events/{id}
+    @GetMapping("/{id}")
+    public ResponseEntity<EventResponseDTO> getEventById(@PathVariable Long id) {
+        return ResponseEntity.ok(eventService.getEventById(id));
+    }
 }

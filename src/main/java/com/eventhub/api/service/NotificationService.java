@@ -9,6 +9,7 @@ import com.eventhub.api.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ public class NotificationService {
     }
 
 
+    @Transactional
     public void createNotification(User user, String message) {
         Notification notification = new Notification();
         notification.setUser(user);
@@ -47,6 +49,7 @@ public class NotificationService {
     }
 
 
+    @Transactional
     public void markAsRead(Long notificationId) {
         User loggedUser = getAuthenticatedUser();
 

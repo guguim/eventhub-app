@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class VoteService {
     private final EventDateOptionRepository dateOptionRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
+    @Transactional
     public VoteResponseDTO castVote(Long dateOptionId) {
 
         User authenticatedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

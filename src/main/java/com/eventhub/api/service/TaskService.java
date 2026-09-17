@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,6 +34,7 @@ public class TaskService {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    @Transactional
     public TaskResponseDTO createTask(Long eventId, TaskRequestDTO request) {
         User loggedUser = getAuthenticatedUser();
         Event event = eventRepository.findById(eventId)
@@ -67,6 +69,7 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public TaskResponseDTO updateTaskStatus(Long taskId, TaskStatusUpdateDTO request) {
         User loggedUser = getAuthenticatedUser();
         Task task = taskRepository.findById(taskId)

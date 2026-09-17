@@ -22,7 +22,6 @@ const EventDetails = () => {
 
   const fetchEventData = async () => {
     try {
-
       const [eventRes, tasksRes] = await Promise.all([
         axios.get(`/api/events/${id}`),
         axios.get(`/api/events/${id}/tasks`)
@@ -39,24 +38,20 @@ const EventDetails = () => {
   };
 
   const setupWebSocket = () => {
-
     const client = new Client({
-      brokerURL: 'ws://localhost:8080/ws', 
+      brokerURL: window.location.origin.replace(/^http/, 'ws') + '/ws', 
       reconnectDelay: 5000,
       onConnect: () => {
         console.log("Conectado ao Túnel WebSocket!");
-
 
         client.subscribe(`/topic/events/${id}/votes`, (message) => {
           console.log("Alguém votou! Recarregando dados...");
           fetchEventData(); 
         });
 
-
         client.subscribe(`/topic/events/${id}/tasks`, (message) => {
           const taskData = JSON.parse(message.body);
           console.log("Uma tarefa mudou de status via WebSocket!", taskData);
-
           setTasks(prevTasks => prevTasks.map(t => t.id === taskData.id ? taskData : t));
         });
       }
@@ -68,7 +63,6 @@ const EventDetails = () => {
   const handleVote = async (dateOptionId) => {
     try {
       await axios.post(`/api/dates/${dateOptionId}/vote`);
-
     } catch (e) {
       alert("Erro ao votar. Provavelmente você já votou nesta data!");
     }
@@ -89,7 +83,7 @@ const EventDetails = () => {
     try {
       await axios.post(`/api/events/${id}/tasks`, { title: newTaskTitle });
       setNewTaskTitle('');
-
+      fetchEventData();
     } catch (e) {
       alert("Acesso Negado: Apenas o organizador pode adicionar tarefas!");
     }

@@ -1,10 +1,13 @@
 package com.eventhub.api.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -12,6 +15,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
+    @Async
     public void sendSimpleEmail(String to, String subject, String text) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -21,11 +25,11 @@ public class EmailService {
             message.setFrom("nao-responda@eventhub.com");
 
             mailSender.send(message);
-            System.out.println("✅ E-mail real enviado com sucesso para: " + to);
+            log.info("✅ E-mail real enviado com sucesso para: {}", to);
 
         } catch (Exception e) {
 
-            System.err.println("⚠️ Simulando e-mail para [" + to + "]. Falha na conexão SMTP (Espera-se erro em Dev): " + e.getMessage());
+            log.warn("⚠️ Simulando e-mail para [{}]. Falha na conexão SMTP (Espera-se erro em Dev): {}", to, e.getMessage());
         }
     }
 }

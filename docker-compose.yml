@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   # Serviço da nossa API (Backend)
@@ -13,6 +12,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/eventhub_db
       SPRING_DATASOURCE_USERNAME: eventhub_user
       SPRING_DATASOURCE_PASSWORD: eventhub_password
+      JWT_SECRET: ${JWT_SECRET:-DefaultDevSecretKeyThatMustBeAtLeast256BitsLongForJjwtToWork}
     depends_on:
       - db # Diz que a API só deve iniciar depois que o banco de dados iniciar
     restart: unless-stopped

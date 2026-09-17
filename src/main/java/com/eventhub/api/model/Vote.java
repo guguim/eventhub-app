@@ -1,6 +1,9 @@
 package com.eventhub.api.model;
 
 import jakarta.persistence.*;
+package com.eventhub.api.model;
+
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,7 +11,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "votes") 
+@Table(name = "votes", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "event_date_option_id"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,5 +34,10 @@ public class Vote {
 
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime votedAt = LocalDateTime.now();
+    private LocalDateTime votedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.votedAt = LocalDateTime.now();
+    }
 }

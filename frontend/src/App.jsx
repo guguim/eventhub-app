@@ -9,6 +9,7 @@ import Register from './pages/Auth/Register';
 import Dashboard from './pages/Dashboard/Dashboard';
 import EventDetails from './pages/Event/EventDetails';
 import CreateEvent from './pages/Event/CreateEvent';
+import NotFound from './pages/NotFound';
 
 // Layout que inclui a Navbar em páginas autenticadas
 const AppLayout = ({ children }) => {
@@ -68,6 +69,9 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+
+            {/* 404 - Catch All */}
+            <Route path="*" element={<NotFound />} />
 
           </Routes>
         </AppLayout>

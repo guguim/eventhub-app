@@ -1,6 +1,8 @@
 package com.eventhub.api.service;
 
 import com.eventhub.api.dto.NotificationResponseDTO;
+import com.eventhub.api.exception.ForbiddenAccessException;
+import com.eventhub.api.exception.ResourceNotFoundException;
 import com.eventhub.api.model.Notification;
 import com.eventhub.api.model.User;
 import com.eventhub.api.repository.NotificationRepository;
@@ -49,11 +51,11 @@ public class NotificationService {
         User loggedUser = getAuthenticatedUser();
 
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Notificação não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Notificação não encontrada."));
 
 
         if (!notification.getUser().getId().equals(loggedUser.getId())) {
-            throw new RuntimeException("Acesso negado: Esta notificação não pertence a você.");
+            throw new ForbiddenAccessException("Acesso negado: Esta notificação não pertence a você.");
         }
 
         notification.setRead(true);

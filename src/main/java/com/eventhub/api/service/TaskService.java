@@ -3,6 +3,8 @@ package com.eventhub.api.service;
 import com.eventhub.api.dto.TaskRequestDTO;
 import com.eventhub.api.dto.TaskResponseDTO;
 import com.eventhub.api.dto.TaskStatusUpdateDTO;
+import com.eventhub.api.exception.ForbiddenAccessException;
+import com.eventhub.api.exception.ResourceNotFoundException;
 import com.eventhub.api.model.Event;
 import com.eventhub.api.model.Task;
 import com.eventhub.api.model.User;
@@ -34,11 +36,11 @@ public class TaskService {
     public TaskResponseDTO createTask(Long eventId, TaskRequestDTO request) {
         User loggedUser = getAuthenticatedUser();
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Evento não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado."));
 
 
         if (!event.getOrganizer().getId().equals(loggedUser.getId())) {
-            throw new RuntimeException("Acesso negado: Somente o organizador do evento pode criar tarefas.");
+            throw new ForbiddenAccessException("Acesso negado: Somente o organizador do evento pode criar tarefas.");
         }
 
         Task task = new Task();
@@ -50,7 +52,7 @@ public class TaskService {
 
         if (request.assigneeId() != null) {
             User assignee = userRepository.findById(request.assigneeId())
-                    .orElseThrow(() -> new RuntimeException("Usuário responsável não encontrado."));
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuário responsável não encontrado."));
             task.setAssignee(assignee);
         }
 
@@ -68,11 +70,11 @@ public class TaskService {
     public TaskResponseDTO updateTaskStatus(Long taskId, TaskStatusUpdateDTO request) {
         User loggedUser = getAuthenticatedUser();
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada."));
 
 
         if (task.getAssignee() == null || !task.getAssignee().getId().equals(loggedUser.getId())) {
-            throw new RuntimeException("Acesso negado: Somente o responsável pela tarefa pode alterar o seu status.");
+            throw new ForbiddenAccessException("Acesso negado: Somente o responsável pela tarefa pode alterar o seu status.");
         }
 
         task.setStatus(request.status());

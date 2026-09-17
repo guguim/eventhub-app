@@ -3,6 +3,8 @@ package com.eventhub.api.service;
 import com.eventhub.api.dto.AuthRequestDTO;
 import com.eventhub.api.dto.AuthResponseDTO;
 import com.eventhub.api.dto.RegisterRequestDTO;
+import com.eventhub.api.exception.BusinessRuleException;
+import com.eventhub.api.exception.ResourceNotFoundException;
 import com.eventhub.api.model.User;
 import com.eventhub.api.repository.UserRepository;
 import com.eventhub.api.security.JwtService;
@@ -24,7 +26,7 @@ public class AuthService {
     public AuthResponseDTO register(RegisterRequestDTO request) {
 
         if (userRepository.findByEmail(request.email()).isPresent()) {
-            throw new RuntimeException("E-mail já cadastrado na plataforma");
+            throw new BusinessRuleException("E-mail já cadastrado na plataforma");
         }
 
 
@@ -55,7 +57,7 @@ public class AuthService {
 
 
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         String jwtToken = jwtService.generateToken(user);
 

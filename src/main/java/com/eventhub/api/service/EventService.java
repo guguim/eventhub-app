@@ -3,6 +3,7 @@ package com.eventhub.api.service;
 import com.eventhub.api.dto.EventDateOptionDTO;
 import com.eventhub.api.dto.EventRequestDTO;
 import com.eventhub.api.dto.EventResponseDTO;
+import com.eventhub.api.exception.ResourceNotFoundException;
 import com.eventhub.api.model.Event;
 import com.eventhub.api.model.EventDateOption;
 import com.eventhub.api.model.User;
@@ -31,7 +32,7 @@ public class EventService {
 
 
         User organizer = userRepository.findById(requestDTO.organizerId())
-                .orElseThrow(() -> new RuntimeException("Organizador não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Organizador não encontrado"));
 
 
         Event event = new Event();
@@ -86,7 +87,7 @@ public class EventService {
     @Transactional(readOnly = true)
     public EventResponseDTO getEventById(Long id) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
         return convertToResponseDTO(event);
     }
 

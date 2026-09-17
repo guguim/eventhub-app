@@ -1,6 +1,8 @@
 package com.eventhub.api.service;
 
 import com.eventhub.api.dto.VoteResponseDTO;
+import com.eventhub.api.exception.BusinessRuleException;
+import com.eventhub.api.exception.ResourceNotFoundException;
 import com.eventhub.api.model.EventDateOption;
 import com.eventhub.api.model.User;
 import com.eventhub.api.model.Vote;
@@ -25,12 +27,12 @@ public class VoteService {
 
 
         EventDateOption dateOption = dateOptionRepository.findById(dateOptionId)
-                .orElseThrow(() -> new RuntimeException("Opção de data não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Opção de data não encontrada."));
 
 
         boolean alreadyVoted = voteRepository.existsByUserIdAndEventDateOptionId(authenticatedUser.getId(), dateOptionId);
         if (alreadyVoted) {
-            throw new RuntimeException("Você já votou nesta data!");
+            throw new BusinessRuleException("Você já votou nesta data!");
         }
 
 

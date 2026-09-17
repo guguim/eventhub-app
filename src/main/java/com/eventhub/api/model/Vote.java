@@ -1,9 +1,6 @@
 package com.eventhub.api.model;
 
 import jakarta.persistence.*;
-package com.eventhub.api.model;
-
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

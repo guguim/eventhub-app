@@ -11,6 +11,8 @@ import com.eventhub.api.repository.EventRepository;
 import com.eventhub.api.repository.UserRepository;
 import com.eventhub.api.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,14 @@ public class EventService {
     private final EmailService emailService;
     private final VoteRepository voteRepository;
 
+
+    private Long getAuthenticatedUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof User) {
+            return ((User) auth.getPrincipal()).getId();
+        }
+        return null;
+    }
 
     @Transactional
     public EventResponseDTO createEvent(EventRequestDTO requestDTO) {
@@ -74,30 +84,33 @@ public class EventService {
         }
 
 
-        return convertToResponseDTO(savedEvent);
+        return convertToResponseDTO(savedEvent, organizer.getId());
     }
 
     @Transactional(readOnly = true) 
     public List<EventResponseDTO> getAllEvents() {
+        Long userId = getAuthenticatedUserId();
         return eventRepository.findAll().stream()
-                .map(this::convertToResponseDTO) 
+                .map(event -> convertToResponseDTO(event, userId)) 
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public EventResponseDTO getEventById(Long id) {
+        Long userId = getAuthenticatedUserId();
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
-        return convertToResponseDTO(event);
+        return convertToResponseDTO(event, userId);
     }
 
 
-    private EventResponseDTO convertToResponseDTO(Event event) {
+    private EventResponseDTO convertToResponseDTO(Event event, Long currentUserId) {
         List<EventDateOptionDTO> dateOptionDTOs = event.getDateOptions().stream()
                 .map(opt -> new EventDateOptionDTO(
                         opt.getId(), 
                         opt.getDateTime(),
-                        voteRepository.countByEventDateOptionId(opt.getId()) 
+                        voteRepository.countByEventDateOptionId(opt.getId()),
+                        currentUserId != null && voteRepository.existsByUserIdAndEventDateOptionId(currentUserId, opt.getId())
                 ))
                 .toList();
 

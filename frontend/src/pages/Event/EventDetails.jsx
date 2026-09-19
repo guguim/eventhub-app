@@ -120,11 +120,29 @@ const EventDetails = () => {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {event.dateOptions.map(date => (
-              <div key={date.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem', background: 'hsla(0,0%,0%,0.2)', borderRadius: '8px' }}>
+              <div key={date.id} style={{ 
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+                padding: '1.25rem', 
+                background: date.voted ? 'hsla(150,60%,40%,0.15)' : 'hsla(0,0%,0%,0.2)', 
+                borderRadius: '8px',
+                border: date.voted ? '1px solid hsla(150,60%,40%,0.3)' : '1px solid transparent',
+                transition: 'all 0.3s ease'
+              }}>
                 <span style={{ fontWeight: '500', fontSize: '1.1rem' }}>{new Date(date.dateTime).toLocaleString('pt-BR')}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ color: 'var(--color-primary)', fontWeight: 'bold', fontSize: '1.2rem' }}>{date.voteCount} votos</span>
-                  <button className="btn-primary" onClick={() => handleVote(date.id)}>Votar</button>
+                  {date.voted ? (
+                    <span style={{ 
+                      display: 'flex', alignItems: 'center', gap: '0.4rem',
+                      padding: '0.5rem 1rem', borderRadius: '6px',
+                      background: 'hsla(150,60%,40%,0.2)', color: 'hsl(150,60%,60%)',
+                      fontWeight: '600', fontSize: '0.9rem'
+                    }}>
+                      <CheckCircle size={16} /> Votado
+                    </span>
+                  ) : (
+                    <button className="btn-primary" onClick={() => handleVote(date.id)}>Votar</button>
+                  )}
                 </div>
               </div>
             ))}

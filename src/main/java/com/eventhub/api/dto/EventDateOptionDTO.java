@@ -5,5 +5,6 @@ import java.time.LocalDateTime;
 public record EventDateOptionDTO(
     Long id,
     LocalDateTime dateTime,
-    long voteCount
+    long voteCount,
+    boolean voted
 ) {}

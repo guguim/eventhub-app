@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Client } from '@stomp/stompjs';
-import { Calendar, MapPin, CheckCircle, Circle, User, UserPlus, UserMinus } from 'lucide-react';
+import { Calendar, MapPin, CheckCircle, Circle, User, UserPlus, UserMinus, Pencil, Trash2, Save, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import Modal from '../../components/Modal';
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -11,8 +12,16 @@ const EventDetails = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editLocation, setEditLocation] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const isOrganizer = event?.organizerId === user?.id;
 
   useEffect(() => {
     fetchEventData();
@@ -109,6 +118,40 @@ const EventDetails = () => {
     }
   };
 
+  const startEditing = () => {
+    setEditTitle(event.title);
+    setEditDescription(event.description);
+    setEditLocation(event.location);
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await axios.put(`/api/events/${id}`, {
+        title: editTitle,
+        description: editDescription,
+        location: editLocation,
+        organizerId: user.id,
+        dateOptions: event.dateOptions.map(d => d.dateTime)
+      });
+      setIsEditing(false);
+      fetchEventData();
+    } catch (e) {
+      alert(e.response?.data?.message || 'Erro ao salvar alterações.');
+    }
+  };
+
+  const handleDeleteEvent = async () => {
+    setDeleting(true);
+    try {
+      await axios.delete(`/api/events/${id}`);
+      navigate('/dashboard');
+    } catch (e) {
+      alert(e.response?.data?.message || 'Erro ao excluir evento.');
+      setDeleting(false);
+    }
+  };
+
   if (loading) return <div className="container animate-fade-in" style={{textAlign: 'center', marginTop: '10vh'}}>Sintonizando no Evento...</div>;
   if (!event) return null;
 
@@ -119,17 +162,56 @@ const EventDetails = () => {
       </button>
 
       <div className="glass-panel" style={{ padding: '2.5rem', marginBottom: '2rem' }}>
-        <h1 style={{ color: 'var(--color-primary)', marginBottom: '0.5rem' }}>{event.title}</h1>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '1.1rem' }}>{event.description}</p>
+        {isEditing ? (
+          <>
+            <div className="input-group" style={{ marginBottom: '1rem' }}>
+              <label>Título</label>
+              <input type="text" value={editTitle} onChange={e => setEditTitle(e.target.value)} />
+            </div>
+            <div className="input-group" style={{ marginBottom: '1rem' }}>
+              <label>Descrição</label>
+              <textarea value={editDescription} onChange={e => setEditDescription(e.target.value)} rows="3" />
+            </div>
+            <div className="input-group" style={{ marginBottom: '1.5rem' }}>
+              <label>Local</label>
+              <input type="text" value={editLocation} onChange={e => setEditLocation(e.target.value)} />
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button className="btn-primary" onClick={handleSaveEdit} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Save size={16} /> Salvar
+              </button>
+              <button className="btn-glass" onClick={() => setIsEditing(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <X size={16} /> Cancelar
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+              <h1 style={{ color: 'var(--color-primary)' }}>{event.title}</h1>
+              {isOrganizer && (
+                <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                  <button className="btn-glass" onClick={startEditing} style={{ padding: '0.5rem 0.8rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <Pencil size={14} /> Editar
+                  </button>
+                  <button className="btn-glass" onClick={() => setShowDeleteModal(true)} style={{ padding: '0.5rem 0.8rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--color-danger)' }}>
+                    <Trash2 size={14} /> Excluir
+                  </button>
+                </div>
+              )}
+            </div>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '1.1rem' }}>{event.description}</p>
 
-        <div style={{ display: 'flex', gap: '2rem', color: 'var(--text-main)', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <MapPin size={20} style={{ color: 'var(--color-primary)' }}/> {event.location}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <User size={20} style={{ color: 'var(--color-primary)' }}/> Organizado por <strong>{event.organizerName}</strong>
-          </div>
-        </div>
+            <div style={{ display: 'flex', gap: '2rem', color: 'var(--text-main)', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <MapPin size={20} style={{ color: 'var(--color-primary)' }}/> {event.location}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <User size={20} style={{ color: 'var(--color-primary)' }}/> Organizado por <strong>{event.organizerName}</strong>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
@@ -227,6 +309,18 @@ const EventDetails = () => {
           )}
         </div>
       </div>
+
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteEvent}
+        title="Excluir evento?"
+        description={`O evento "${event.title}" e todos os seus votos e tarefas serão removidos permanentemente.`}
+        confirmText="Sim, excluir"
+        cancelText="Cancelar"
+        variant="delete"
+        loading={deleting}
+      />
     </div>
   );
 };

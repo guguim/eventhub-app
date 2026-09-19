@@ -3,6 +3,7 @@ package com.eventhub.api.service;
 import com.eventhub.api.dto.EventDateOptionDTO;
 import com.eventhub.api.dto.EventRequestDTO;
 import com.eventhub.api.dto.EventResponseDTO;
+import com.eventhub.api.exception.ForbiddenAccessException;
 import com.eventhub.api.exception.ResourceNotFoundException;
 import com.eventhub.api.model.Event;
 import com.eventhub.api.model.EventDateOption;
@@ -101,6 +102,37 @@ public class EventService {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
         return convertToResponseDTO(event, userId);
+    }
+
+    @Transactional
+    public EventResponseDTO updateEvent(Long id, EventRequestDTO requestDTO) {
+        Long userId = getAuthenticatedUserId();
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
+
+        if (!event.getOrganizer().getId().equals(userId)) {
+            throw new ForbiddenAccessException("Apenas o organizador pode editar este evento.");
+        }
+
+        event.setTitle(requestDTO.title());
+        event.setDescription(requestDTO.description());
+        event.setLocation(requestDTO.location());
+
+        Event savedEvent = eventRepository.save(event);
+        return convertToResponseDTO(savedEvent, userId);
+    }
+
+    @Transactional
+    public void deleteEvent(Long id) {
+        Long userId = getAuthenticatedUserId();
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
+
+        if (!event.getOrganizer().getId().equals(userId)) {
+            throw new ForbiddenAccessException("Apenas o organizador pode excluir este evento.");
+        }
+
+        eventRepository.delete(event);
     }
 
 

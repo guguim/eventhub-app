@@ -11,29 +11,39 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController 
-@RequestMapping("/api/events") 
+@RestController
+@RequestMapping("/api/events")
 @RequiredArgsConstructor
 public class EventController {
 
-    private final EventService eventService; 
-
+    private final EventService eventService;
 
     @PostMapping
     public ResponseEntity<EventResponseDTO> createEvent(@Valid @RequestBody EventRequestDTO requestDTO) {
         EventResponseDTO response = eventService.createEvent(requestDTO);
-        return new ResponseEntity<>(response, HttpStatus.CREATED); 
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-
 
     @GetMapping
     public ResponseEntity<List<EventResponseDTO>> getAllEvents() {
-        return ResponseEntity.ok(eventService.getAllEvents()); 
+        return ResponseEntity.ok(eventService.getAllEvents());
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<EventResponseDTO> getEventById(@PathVariable Long id) {
         return ResponseEntity.ok(eventService.getEventById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EventResponseDTO> updateEvent(
+            @PathVariable Long id,
+            @Valid @RequestBody EventRequestDTO requestDTO) {
+        return ResponseEntity.ok(eventService.updateEvent(id, requestDTO));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
+        eventService.deleteEvent(id);
+        return ResponseEntity.noContent().build();
     }
 }

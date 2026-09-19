@@ -3,10 +3,12 @@ package com.eventhub.api.service;
 import com.eventhub.api.dto.TaskRequestDTO;
 import com.eventhub.api.dto.TaskResponseDTO;
 import com.eventhub.api.dto.TaskStatusUpdateDTO;
+import com.eventhub.api.exception.BusinessRuleException;
 import com.eventhub.api.exception.ForbiddenAccessException;
 import com.eventhub.api.exception.ResourceNotFoundException;
 import com.eventhub.api.model.Event;
 import com.eventhub.api.model.Task;
+import com.eventhub.api.model.TaskStatus;
 import com.eventhub.api.model.User;
 import com.eventhub.api.repository.EventRepository;
 import com.eventhub.api.repository.TaskRepository;
@@ -91,6 +93,48 @@ public class TaskService {
         return responseDTO;
     }
 
+
+    @Transactional
+    public TaskResponseDTO assignTask(Long taskId) {
+        User loggedUser = getAuthenticatedUser();
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada."));
+
+        if (task.getAssignee() != null) {
+            throw new BusinessRuleException("Esta tarefa já possui um responsável.");
+        }
+
+        task.setAssignee(loggedUser);
+        Task savedTask = taskRepository.save(task);
+
+        TaskResponseDTO responseDTO = mapToDTO(savedTask);
+        messagingTemplate.convertAndSend("/topic/events/" + task.getEvent().getId() + "/tasks", responseDTO);
+
+        return responseDTO;
+    }
+
+    @Transactional
+    public TaskResponseDTO unassignTask(Long taskId) {
+        User loggedUser = getAuthenticatedUser();
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada."));
+
+        boolean isOrganizer = task.getEvent().getOrganizer().getId().equals(loggedUser.getId());
+        boolean isAssignee = task.getAssignee() != null && task.getAssignee().getId().equals(loggedUser.getId());
+
+        if (!isOrganizer && !isAssignee) {
+            throw new ForbiddenAccessException("Apenas o organizador ou o responsável podem desatribuir esta tarefa.");
+        }
+
+        task.setAssignee(null);
+        task.setStatus(TaskStatus.PENDING);
+        Task savedTask = taskRepository.save(task);
+
+        TaskResponseDTO responseDTO = mapToDTO(savedTask);
+        messagingTemplate.convertAndSend("/topic/events/" + task.getEvent().getId() + "/tasks", responseDTO);
+
+        return responseDTO;
+    }
 
     private TaskResponseDTO mapToDTO(Task task) {
         Long assigneeId = task.getAssignee() != null ? task.getAssignee().getId() : null;

@@ -40,4 +40,14 @@ public class TaskController {
             @Valid @RequestBody TaskStatusUpdateDTO request) {
         return ResponseEntity.ok(taskService.updateTaskStatus(taskId, request));
     }
+
+    @PatchMapping("/tasks/{taskId}/assign")
+    public ResponseEntity<TaskResponseDTO> assignTask(@PathVariable Long taskId) {
+        return ResponseEntity.ok(taskService.assignTask(taskId));
+    }
+
+    @PatchMapping("/tasks/{taskId}/unassign")
+    public ResponseEntity<TaskResponseDTO> unassignTask(@PathVariable Long taskId) {
+        return ResponseEntity.ok(taskService.unassignTask(taskId));
+    }
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Client } from '@stomp/stompjs';
-import { Calendar, MapPin, CheckCircle, Circle, User } from 'lucide-react';
+import { Calendar, MapPin, CheckCircle, Circle, User, UserPlus, UserMinus } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const EventDetails = () => {
@@ -86,6 +86,26 @@ const EventDetails = () => {
       fetchEventData();
     } catch (e) {
       alert("Acesso Negado: Apenas o organizador pode adicionar tarefas!");
+    }
+  };
+
+  const handleAssignTask = async (taskId, e) => {
+    e.stopPropagation();
+    try {
+      await axios.patch(`/api/tasks/${taskId}/assign`);
+      fetchEventData();
+    } catch (e) {
+      alert(e.response?.data?.message || "Erro ao assumir tarefa.");
+    }
+  };
+
+  const handleUnassignTask = async (taskId, e) => {
+    e.stopPropagation();
+    try {
+      await axios.patch(`/api/tasks/${taskId}/unassign`);
+      fetchEventData();
+    } catch (e) {
+      alert(e.response?.data?.message || "Erro ao liberar tarefa.");
     }
   };
 
@@ -183,6 +203,24 @@ const EventDetails = () => {
                     <p style={{ fontWeight: '600', fontSize: '1.1rem', textDecoration: task.status === 'COMPLETED' ? 'line-through' : 'none' }}>{task.title}</p>
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Responsável: {task.assigneeName || 'Livre'}</p>
                   </div>
+                  {!task.assigneeId && (
+                    <button 
+                      className="btn-primary" 
+                      onClick={(e) => handleAssignTask(task.id, e)}
+                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                    >
+                      <UserPlus size={14} /> Assumir
+                    </button>
+                  )}
+                  {task.assigneeId && task.assigneeId === user?.id && (
+                    <button 
+                      className="btn-glass" 
+                      onClick={(e) => handleUnassignTask(task.id, e)}
+                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                    >
+                      <UserMinus size={14} /> Liberar
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

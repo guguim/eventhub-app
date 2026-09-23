@@ -98,7 +98,8 @@ public class TaskService {
             throw new BusinessRuleException("Esta tarefa já possui um responsável.");
         }
 
-        task.setAssignee(loggedUser);
+        User managedUser = userRepository.getReferenceById(loggedUser.getId());
+        task.setAssignee(managedUser);
         Task savedTask = taskRepository.save(task);
 
         TaskResponseDTO responseDTO = mapToDTO(savedTask);

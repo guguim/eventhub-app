@@ -6,8 +6,8 @@ import com.eventhub.api.exception.ResourceNotFoundException;
 import com.eventhub.api.model.EventDateOption;
 import com.eventhub.api.model.User;
 import com.eventhub.api.model.Vote;
-import com.eventhub.api.repository.EventDateOptionRepository;
 import com.eventhub.api.repository.VoteRepository;
+import com.eventhub.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
@@ -20,6 +20,7 @@ public class VoteService {
 
     private final VoteRepository voteRepository;
     private final EventDateOptionRepository dateOptionRepository;
+    private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
@@ -37,7 +38,8 @@ public class VoteService {
 
 
         Vote vote = new Vote();
-        vote.setUser(authenticatedUser);
+        User managedUser = userRepository.getReferenceById(authenticatedUser.getId());
+        vote.setUser(managedUser);
         vote.setEventDateOption(dateOption);
 
         Vote savedVote = voteRepository.save(vote);

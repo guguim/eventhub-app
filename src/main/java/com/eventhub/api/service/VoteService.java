@@ -10,7 +10,7 @@ import com.eventhub.api.repository.EventDateOptionRepository;
 import com.eventhub.api.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,9 +23,7 @@ public class VoteService {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
-    public VoteResponseDTO castVote(Long dateOptionId) {
-
-        User authenticatedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public VoteResponseDTO castVote(Long dateOptionId, User authenticatedUser) {
 
 
         EventDateOption dateOption = dateOptionRepository.findById(dateOptionId)

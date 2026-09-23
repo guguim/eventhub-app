@@ -7,7 +7,7 @@ import com.eventhub.api.model.Notification;
 import com.eventhub.api.model.User;
 import com.eventhub.api.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +20,7 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
 
-    private User getAuthenticatedUser() {
-        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
+
 
 
     @Transactional
@@ -34,8 +32,7 @@ public class NotificationService {
     }
 
 
-    public List<NotificationResponseDTO> getMyNotifications() {
-        User loggedUser = getAuthenticatedUser();
+    public List<NotificationResponseDTO> getMyNotifications(User loggedUser) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(loggedUser.getId())
                 .stream()
                 .map(n -> new NotificationResponseDTO(n.getId(), n.getMessage(), n.isRead(), n.getCreatedAt()))
@@ -43,15 +40,13 @@ public class NotificationService {
     }
 
 
-    public long getUnreadCount() {
-        User loggedUser = getAuthenticatedUser();
+    public long getUnreadCount(User loggedUser) {
         return notificationRepository.countByUserIdAndIsReadFalse(loggedUser.getId());
     }
 
 
     @Transactional
-    public void markAsRead(Long notificationId) {
-        User loggedUser = getAuthenticatedUser();
+    public void markAsRead(Long notificationId, User loggedUser) {
 
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Notificação não encontrada."));

@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.eventhub.api.model.User;
 
 import java.util.List;
 
@@ -23,8 +25,9 @@ public class TaskController {
     @PostMapping("/events/{eventId}/tasks")
     public ResponseEntity<TaskResponseDTO> createTask(
             @PathVariable Long eventId,
-            @Valid @RequestBody TaskRequestDTO request) {
-        return new ResponseEntity<>(taskService.createTask(eventId, request), HttpStatus.CREATED);
+            @Valid @RequestBody TaskRequestDTO request,
+            @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(taskService.createTask(eventId, request, user), HttpStatus.CREATED);
     }
 
 
@@ -37,17 +40,18 @@ public class TaskController {
     @PatchMapping("/tasks/{taskId}/status")
     public ResponseEntity<TaskResponseDTO> updateTaskStatus(
             @PathVariable Long taskId,
-            @Valid @RequestBody TaskStatusUpdateDTO request) {
-        return ResponseEntity.ok(taskService.updateTaskStatus(taskId, request));
+            @Valid @RequestBody TaskStatusUpdateDTO request,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(taskService.updateTaskStatus(taskId, request, user));
     }
 
     @PatchMapping("/tasks/{taskId}/assign")
-    public ResponseEntity<TaskResponseDTO> assignTask(@PathVariable Long taskId) {
-        return ResponseEntity.ok(taskService.assignTask(taskId));
+    public ResponseEntity<TaskResponseDTO> assignTask(@PathVariable Long taskId, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(taskService.assignTask(taskId, user));
     }
 
     @PatchMapping("/tasks/{taskId}/unassign")
-    public ResponseEntity<TaskResponseDTO> unassignTask(@PathVariable Long taskId) {
-        return ResponseEntity.ok(taskService.unassignTask(taskId));
+    public ResponseEntity<TaskResponseDTO> unassignTask(@PathVariable Long taskId, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(taskService.unassignTask(taskId, user));
     }
 }

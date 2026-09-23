@@ -12,8 +12,6 @@ import com.eventhub.api.repository.EventRepository;
 import com.eventhub.api.repository.UserRepository;
 import com.eventhub.api.repository.VoteRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,13 +28,7 @@ public class EventService {
     private final VoteRepository voteRepository;
 
 
-    private Long getAuthenticatedUserId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.getPrincipal() instanceof User) {
-            return ((User) auth.getPrincipal()).getId();
-        }
-        return null;
-    }
+
 
     @Transactional
     public EventResponseDTO createEvent(EventRequestDTO requestDTO) {
@@ -89,24 +81,21 @@ public class EventService {
     }
 
     @Transactional(readOnly = true) 
-    public List<EventResponseDTO> getAllEvents() {
-        Long userId = getAuthenticatedUserId();
+    public List<EventResponseDTO> getAllEvents(Long userId) {
         return eventRepository.findAll().stream()
                 .map(event -> convertToResponseDTO(event, userId)) 
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public EventResponseDTO getEventById(Long id) {
-        Long userId = getAuthenticatedUserId();
+    public EventResponseDTO getEventById(Long id, Long userId) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
         return convertToResponseDTO(event, userId);
     }
 
     @Transactional
-    public EventResponseDTO updateEvent(Long id, EventRequestDTO requestDTO) {
-        Long userId = getAuthenticatedUserId();
+    public EventResponseDTO updateEvent(Long id, EventRequestDTO requestDTO, Long userId) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
 
@@ -123,8 +112,7 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteEvent(Long id) {
-        Long userId = getAuthenticatedUserId();
+    public void deleteEvent(Long id, Long userId) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
 

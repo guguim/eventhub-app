@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Client } from '@stomp/stompjs';
 import { Calendar, MapPin, CheckCircle, Circle, User, UserPlus, UserMinus, Pencil, Trash2, Save, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../components/Toast';
 import Modal from '../../components/Modal';
 
 const EventDetails = () => {
@@ -20,6 +21,7 @@ const EventDetails = () => {
   const [deleting, setDeleting] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const isOrganizer = event?.organizerId === user?.id;
 
@@ -39,7 +41,7 @@ const EventDetails = () => {
       setTasks(tasksRes.data);
     } catch (error) {
       console.error("Erro ao buscar detalhes", error);
-      alert("Evento não encontrado ou servidor indisponível.");
+      toast.error('Evento não encontrado ou servidor indisponível.');
       navigate('/dashboard');
     } finally {
       setLoading(false);
@@ -72,8 +74,9 @@ const EventDetails = () => {
   const handleVote = async (dateOptionId) => {
     try {
       await axios.post(`/api/dates/${dateOptionId}/vote`);
+      toast.success('Voto registrado com sucesso!');
     } catch (e) {
-      alert("Erro ao votar. Provavelmente você já votou nesta data!");
+      toast.warning('Você já votou nesta data!');
     }
   };
 
@@ -82,7 +85,7 @@ const EventDetails = () => {
       const newStatus = task.status === 'PENDING' ? 'COMPLETED' : 'PENDING';
       await axios.patch(`/api/tasks/${task.id}/status`, { status: newStatus });
     } catch (e) {
-      alert("⚠️ Acesso Negado: Nosso Java Object-Level Security (Fase 4) bloqueou você. Apenas o organizador do evento ou o responsável pela tarefa podem alterá-la.");
+      toast.error('Apenas o responsável pela tarefa pode alterar o status.', 'Acesso Negado');
     }
   };
 
@@ -94,7 +97,7 @@ const EventDetails = () => {
       setNewTaskTitle('');
       fetchEventData();
     } catch (e) {
-      alert("Acesso Negado: Apenas o organizador pode adicionar tarefas!");
+      toast.error('Apenas o organizador pode adicionar tarefas.', 'Acesso Negado');
     }
   };
 
@@ -103,8 +106,9 @@ const EventDetails = () => {
     try {
       await axios.patch(`/api/tasks/${taskId}/assign`);
       fetchEventData();
+      toast.success('Tarefa assumida com sucesso!');
     } catch (e) {
-      alert(e.response?.data?.message || "Erro ao assumir tarefa.");
+      toast.error(e.response?.data?.message || 'Erro ao assumir tarefa.');
     }
   };
 
@@ -113,8 +117,9 @@ const EventDetails = () => {
     try {
       await axios.patch(`/api/tasks/${taskId}/unassign`);
       fetchEventData();
+      toast.success('Tarefa liberada.');
     } catch (e) {
-      alert(e.response?.data?.message || "Erro ao liberar tarefa.");
+      toast.error(e.response?.data?.message || 'Erro ao liberar tarefa.');
     }
   };
 
@@ -136,8 +141,9 @@ const EventDetails = () => {
       });
       setIsEditing(false);
       fetchEventData();
+      toast.success('Evento atualizado com sucesso!');
     } catch (e) {
-      alert(e.response?.data?.message || 'Erro ao salvar alterações.');
+      toast.error(e.response?.data?.message || 'Erro ao salvar alterações.');
     }
   };
 
@@ -147,7 +153,7 @@ const EventDetails = () => {
       await axios.delete(`/api/events/${id}`);
       navigate('/dashboard');
     } catch (e) {
-      alert(e.response?.data?.message || 'Erro ao excluir evento.');
+      toast.error(e.response?.data?.message || 'Erro ao excluir evento.');
       setDeleting(false);
     }
   };

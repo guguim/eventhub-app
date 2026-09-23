@@ -15,7 +15,6 @@ import com.eventhub.api.repository.TaskRepository;
 import com.eventhub.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,13 +31,10 @@ public class TaskService {
     private final SimpMessagingTemplate messagingTemplate;
 
 
-    private User getAuthenticatedUser() {
-        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
+
 
     @Transactional
-    public TaskResponseDTO createTask(Long eventId, TaskRequestDTO request) {
-        User loggedUser = getAuthenticatedUser();
+    public TaskResponseDTO createTask(Long eventId, TaskRequestDTO request, User loggedUser) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado."));
 
@@ -72,8 +68,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponseDTO updateTaskStatus(Long taskId, TaskStatusUpdateDTO request) {
-        User loggedUser = getAuthenticatedUser();
+    public TaskResponseDTO updateTaskStatus(Long taskId, TaskStatusUpdateDTO request, User loggedUser) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada."));
 
@@ -95,8 +90,7 @@ public class TaskService {
 
 
     @Transactional
-    public TaskResponseDTO assignTask(Long taskId) {
-        User loggedUser = getAuthenticatedUser();
+    public TaskResponseDTO assignTask(Long taskId, User loggedUser) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada."));
 
@@ -114,8 +108,7 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponseDTO unassignTask(Long taskId) {
-        User loggedUser = getAuthenticatedUser();
+    public TaskResponseDTO unassignTask(Long taskId, User loggedUser) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada."));
 

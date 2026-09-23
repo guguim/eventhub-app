@@ -1,41 +1,35 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm, useFieldArray } from 'react-hook-form';
 import axios from 'axios';
 import { Calendar, Plus, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../components/Toast';
 
 const CreateEvent = () => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
-  const [dateOptions, setDateOptions] = useState(['']); // Começa com 1 campo vazio
-  const [submitting, setSubmitting] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
 
-  const addDateField = () => {
-    setDateOptions([...dateOptions, '']);
-  };
+  const { register, control, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+    defaultValues: {
+      title: '',
+      description: '',
+      location: '',
+      dateOptions: [{ date: '' }]
+    }
+  });
 
-  const removeDateField = (index) => {
-    if (dateOptions.length <= 1) return; // Mínimo 1 data
-    setDateOptions(dateOptions.filter((_, i) => i !== index));
-  };
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "dateOptions"
+  });
 
-  const updateDate = (index, value) => {
-    const updated = [...dateOptions];
-    updated[index] = value;
-    setDateOptions(updated);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const onSubmit = async (data) => {
     // Filtra datas preenchidas e converte
-    const filledDates = dateOptions
-      .filter(d => d.trim() !== '')
+    const filledDates = data.dateOptions
+      .map(d => d.date)
+      .filter(d => d && d.trim() !== '')
       .map(d => new Date(d).toISOString().slice(0, 19));
 
     if (filledDates.length === 0) {
@@ -43,13 +37,11 @@ const CreateEvent = () => {
       return;
     }
 
-    setSubmitting(true);
-
     try {
       const response = await axios.post('/api/events', {
-        title,
-        description,
-        location,
+        title: data.title,
+        description: data.description,
+        location: data.location,
         organizerId: user.id,
         dateOptions: filledDates
       });
@@ -58,8 +50,6 @@ const CreateEvent = () => {
       navigate(`/eventos/${response.data.id}`);
     } catch (err) {
       console.error('Erro ao criar evento:', err);
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -72,20 +62,34 @@ const CreateEvent = () => {
       <div className="glass-panel" style={{ padding: '2.5rem', maxWidth: '600px', margin: '0 auto' }}>
         <h2 style={{ marginBottom: '1.5rem', color: 'var(--color-primary)' }}>Criar Novo Evento</h2>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="input-group">
             <label>Título do Evento</label>
-            <input type="text" required value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Festa de Fim de Ano" />
+            <input 
+              type="text" 
+              placeholder="Ex: Festa de Fim de Ano" 
+              {...register('title', { required: 'Título é obrigatório' })}
+            />
+            {errors.title && <span style={{ color: 'var(--color-danger)', fontSize: '0.85rem' }}>{errors.title.message}</span>}
           </div>
 
           <div className="input-group">
             <label>Descrição</label>
-            <textarea required value={description} onChange={e => setDescription(e.target.value)} placeholder="Detalhes do evento..." rows="3" />
+            <textarea 
+              placeholder="Detalhes do evento..." 
+              rows="3" 
+              {...register('description', { required: 'Descrição é obrigatória' })}
+            />
+            {errors.description && <span style={{ color: 'var(--color-danger)', fontSize: '0.85rem' }}>{errors.description.message}</span>}
           </div>
 
           <div className="input-group">
             <label>Local (Opcional)</label>
-            <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="Onde vai ser?" />
+            <input 
+              type="text" 
+              placeholder="Onde vai ser?" 
+              {...register('location')}
+            />
           </div>
 
           <div style={{ marginTop: '2rem', marginBottom: '1.5rem' }}>
@@ -96,7 +100,7 @@ const CreateEvent = () => {
               <button
                 type="button"
                 className="btn-glass"
-                onClick={addDateField}
+                onClick={() => append({ date: '' })}
                 style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem' }}
               >
                 <Plus size={16} /> Adicionar
@@ -107,9 +111,9 @@ const CreateEvent = () => {
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {dateOptions.map((date, index) => (
+              {fields.map((field, index) => (
                 <div 
-                  key={index} 
+                  key={field.id} 
                   className="animate-fade-in"
                   style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
@@ -124,9 +128,7 @@ const CreateEvent = () => {
                   </span>
                   <input
                     type="datetime-local"
-                    value={date}
-                    onChange={e => updateDate(index, e.target.value)}
-                    required={index === 0} // Apenas a primeira é obrigatória
+                    {...register(`dateOptions.${index}.date`, { required: index === 0 })}
                     style={{
                       flex: 1,
                       background: 'hsla(0, 0%, 0%, 0.2)',
@@ -138,11 +140,11 @@ const CreateEvent = () => {
                       fontSize: '0.95rem',
                     }}
                   />
-                  {dateOptions.length > 1 && (
+                  {fields.length > 1 && (
                     <button
                       type="button"
                       className="btn-icon"
-                      onClick={() => removeDateField(index)}
+                      onClick={() => remove(index)}
                       title="Remover esta data"
                       style={{ color: 'var(--color-danger)' }}
                     >
@@ -158,9 +160,9 @@ const CreateEvent = () => {
             type="submit" 
             className="btn-primary" 
             style={{ width: '100%', marginTop: '2rem' }}
-            disabled={submitting}
+            disabled={isSubmitting}
           >
-            {submitting ? 'Publicando...' : (
+            {isSubmitting ? 'Publicando...' : (
               <>
                 <Plus size={20} /> Publicar Evento
               </>

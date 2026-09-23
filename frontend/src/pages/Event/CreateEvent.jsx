@@ -57,7 +57,7 @@ const CreateEvent = () => {
       toast.success('Evento publicado com sucesso!');
       navigate(`/eventos/${response.data.id}`);
     } catch (err) {
-      toast.error('Erro ao criar evento. Verifique os dados.');
+      console.error('Erro ao criar evento:', err);
     } finally {
       setSubmitting(false);
     }

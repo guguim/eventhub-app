@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
+import { AxiosInterceptor } from './components/AxiosInterceptor';
 
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
@@ -33,7 +34,8 @@ function App() {
     <AuthProvider>
       <Router>
         <AppLayout>
-          <Routes>
+          <AxiosInterceptor>
+            <Routes>
 
             {/* Rotas Públicas */}
             <Route path="/login" element={<Login />} />
@@ -73,7 +75,8 @@ function App() {
             {/* 404 - Catch All */}
             <Route path="*" element={<NotFound />} />
 
-          </Routes>
+            </Routes>
+          </AxiosInterceptor>
         </AppLayout>
       </Router>
     </AuthProvider>

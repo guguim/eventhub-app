@@ -31,6 +31,17 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    @Transactional
+    public void createNotifications(List<User> users, String message) {
+        List<Notification> notifications = users.stream().map(user -> {
+            Notification notification = new Notification();
+            notification.setUser(user);
+            notification.setMessage(message);
+            return notification;
+        }).collect(Collectors.toList());
+        notificationRepository.saveAll(notifications);
+    }
+
 
     public List<NotificationResponseDTO> getMyNotifications(User loggedUser) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(loggedUser.getId())

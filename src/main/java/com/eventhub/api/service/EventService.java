@@ -16,6 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service 
 @RequiredArgsConstructor 
@@ -59,18 +64,18 @@ public class EventService {
         Event savedEvent = eventRepository.save(event);
 
 
-        List<User> allUsers = userRepository.findAll();
-        for (User user : allUsers) {
-            if (!user.getId().equals(organizer.getId())) {
-                String message = "Novo evento criado: " + event.getTitle() + " por " + organizer.getName();
+        List<User> usersToNotify = userRepository.findAll().stream()
+                .filter(u -> !u.getId().equals(organizer.getId()))
+                .toList();
 
+        if (!usersToNotify.isEmpty()) {
+            String message = "Novo evento criado: " + event.getTitle() + " por " + organizer.getName();
+            notificationService.createNotifications(usersToNotify, message);
 
-                notificationService.createNotification(user, message);
-
-
+            for (User user : usersToNotify) {
                 emailService.sendSimpleEmail(
-                        user.getEmail(), 
-                        "Convite: " + event.getTitle(), 
+                        user.getEmail(),
+                        "Convite: " + event.getTitle(),
                         "Olá " + user.getName() + ",\n\nUm novo evento foi criado!\nDetalhes: " + event.getDescription()
                 );
             }
@@ -82,8 +87,17 @@ public class EventService {
 
     @Transactional(readOnly = true) 
     public List<EventResponseDTO> getAllEvents(Long userId) {
-        return eventRepository.findAll().stream()
-                .map(event -> convertToResponseDTO(event, userId)) 
+        List<Event> events = eventRepository.findAll();
+        List<Long> allOptionIds = events.stream()
+                .flatMap(e -> e.getDateOptions().stream())
+                .map(EventDateOption::getId)
+                .toList();
+
+        Map<Long, Long> voteCounts = getVoteCounts(allOptionIds);
+        Set<Long> userVotedOptions = getUserVotedOptions(userId, allOptionIds);
+
+        return events.stream()
+                .map(event -> convertToResponseDTO(event, userId, voteCounts, userVotedOptions)) 
                 .toList();
     }
 
@@ -124,13 +138,34 @@ public class EventService {
     }
 
 
+    private Map<Long, Long> getVoteCounts(List<Long> optionIds) {
+        if (optionIds.isEmpty()) return Collections.emptyMap();
+        return voteRepository.countVotesByOptionIds(optionIds).stream()
+                .collect(Collectors.toMap(
+                        arr -> (Long) arr[0],
+                        arr -> (Long) arr[1]
+                ));
+    }
+
+    private Set<Long> getUserVotedOptions(Long userId, List<Long> optionIds) {
+        if (userId == null || optionIds.isEmpty()) return Collections.emptySet();
+        return new HashSet<>(voteRepository.findVotedOptionIdsByUserIdAndOptionIds(userId, optionIds));
+    }
+
     private EventResponseDTO convertToResponseDTO(Event event, Long currentUserId) {
+        List<Long> optionIds = event.getDateOptions().stream().map(EventDateOption::getId).toList();
+        Map<Long, Long> voteCounts = getVoteCounts(optionIds);
+        Set<Long> userVotedOptions = getUserVotedOptions(currentUserId, optionIds);
+        return convertToResponseDTO(event, currentUserId, voteCounts, userVotedOptions);
+    }
+
+    private EventResponseDTO convertToResponseDTO(Event event, Long currentUserId, Map<Long, Long> voteCounts, Set<Long> userVotedOptions) {
         List<EventDateOptionDTO> dateOptionDTOs = event.getDateOptions().stream()
                 .map(opt -> new EventDateOptionDTO(
                         opt.getId(), 
                         opt.getDateTime(),
-                        voteRepository.countByEventDateOptionId(opt.getId()),
-                        currentUserId != null && voteRepository.existsByUserIdAndEventDateOptionId(currentUserId, opt.getId())
+                        voteCounts.getOrDefault(opt.getId(), 0L),
+                        userVotedOptions.contains(opt.getId())
                 ))
                 .toList();
 

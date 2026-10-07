@@ -9,37 +9,29 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
 
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('userData');
-    return saved ? { token, ...JSON.parse(saved) } : (token ? { token } : null);
+    return saved ? JSON.parse(saved) : null;
   });
   const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      localStorage.removeItem('token');
+    axios.defaults.withCredentials = true;
+    if (!user) {
       localStorage.removeItem('userData');
-      delete axios.defaults.headers.common['Authorization'];
-      setUser(null);
     }
     setLoading(false);
-  }, [token]);
+  }, [user]);
 
 
   const login = async (email, password) => {
     try {
       const response = await axios.post('/api/auth/login', { email, password });
-      setToken(response.data.token); 
-
 
       const userData = { id: response.data.userId, name: response.data.name };
       localStorage.setItem('userData', JSON.stringify(userData));
-      setUser({ token: response.data.token, ...userData });
+      setUser(userData);
 
       return true;
     } catch (error) {
@@ -59,8 +51,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setToken(null);
+  const logout = async () => {
+    try {
+      await axios.post('/api/auth/logout');
+    } catch(e) {}
+    setUser(null);
   };
 
   return (

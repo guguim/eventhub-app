@@ -6,6 +6,10 @@ import com.eventhub.api.exception.ResourceNotFoundException;
 import com.eventhub.api.model.Notification;
 import com.eventhub.api.model.User;
 import com.eventhub.api.repository.NotificationRepository;
+import com.eventhub.api.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -19,6 +23,8 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
 
 
 
@@ -40,6 +46,31 @@ public class NotificationService {
             return notification;
         }).collect(Collectors.toList());
         notificationRepository.saveAll(notifications);
+    }
+
+    @Async
+    @Transactional
+    public void notifyNewEventAsync(String eventTitle, String eventDescription, Long organizerId, String organizerName) {
+        int page = 0;
+        int size = 100;
+        Page<User> userPage;
+        String message = "Novo evento criado: " + eventTitle + " por " + organizerName;
+        
+        do {
+            userPage = userRepository.findByIdNot(organizerId, PageRequest.of(page, size));
+            List<User> users = userPage.getContent();
+            if (!users.isEmpty()) {
+                createNotifications(users, message);
+                for (User user : users) {
+                    emailService.sendSimpleEmail(
+                            user.getEmail(),
+                            "Convite: " + eventTitle,
+                            "Olá " + user.getName() + ",\n\nUm novo evento foi criado!\nDetalhes: " + eventDescription
+                    );
+                }
+            }
+            page++;
+        } while (userPage.hasNext());
     }
 
 

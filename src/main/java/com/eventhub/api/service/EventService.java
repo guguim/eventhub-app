@@ -63,24 +63,12 @@ public class EventService {
 
         Event savedEvent = eventRepository.save(event);
 
-
-        List<User> usersToNotify = userRepository.findAll().stream()
-                .filter(u -> !u.getId().equals(organizer.getId()))
-                .toList();
-
-        if (!usersToNotify.isEmpty()) {
-            String message = "Novo evento criado: " + event.getTitle() + " por " + organizer.getName();
-            notificationService.createNotifications(usersToNotify, message);
-
-            for (User user : usersToNotify) {
-                emailService.sendSimpleEmail(
-                        user.getEmail(),
-                        "Convite: " + event.getTitle(),
-                        "Olá " + user.getName() + ",\n\nUm novo evento foi criado!\nDetalhes: " + event.getDescription()
-                );
-            }
-        }
-
+        notificationService.notifyNewEventAsync(
+                savedEvent.getTitle(),
+                savedEvent.getDescription(),
+                organizer.getId(),
+                organizer.getName()
+        );
 
         return convertToResponseDTO(savedEvent, organizer.getId());
     }

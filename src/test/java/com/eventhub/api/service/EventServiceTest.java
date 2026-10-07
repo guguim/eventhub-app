@@ -63,9 +63,6 @@ class EventServiceTest {
 
         when(userRepository.findById(organizerId)).thenReturn(Optional.of(mockUser));
         when(eventRepository.save(any(Event.class))).thenReturn(mockSavedEvent);
-        when(userRepository.findAll()).thenReturn(List.of(mockUser)); 
-
-
         EventResponseDTO response = eventService.createEvent(requestDTO, mockUser);
 
 
@@ -76,6 +73,9 @@ class EventServiceTest {
 
         verify(userRepository, times(1)).findById(organizerId);
         verify(eventRepository, times(1)).save(any(Event.class));
+        verify(notificationService, times(1)).notifyNewEventAsync(
+                anyString(), anyString(), eq(organizerId), anyString()
+        );
     }
 
     @Test

@@ -7,6 +7,7 @@ import com.eventhub.api.model.Role;
 import com.eventhub.api.model.User;
 import com.eventhub.api.model.Vote;
 import com.eventhub.api.repository.EventDateOptionRepository;
+import com.eventhub.api.repository.UserRepository;
 import com.eventhub.api.repository.VoteRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,9 @@ class VoteServiceTest {
 
     @Mock
     private EventDateOptionRepository dateOptionRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
@@ -79,9 +83,10 @@ class VoteServiceTest {
         mockSavedVote.setId(99L);
         when(voteRepository.save(any(Vote.class))).thenReturn(mockSavedVote);
         when(voteRepository.countByEventDateOptionId(dateId)).thenReturn(5L); 
+        when(userRepository.getReferenceById(mockUser.getId())).thenReturn(mockUser);
 
 
-        VoteResponseDTO response = voteService.castVote(dateId);
+        VoteResponseDTO response = voteService.castVote(dateId, mockUser);
 
 
         assertNotNull(response);
@@ -103,7 +108,7 @@ class VoteServiceTest {
 
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            voteService.castVote(dateId);
+            voteService.castVote(dateId, mockUser);
         });
 
 

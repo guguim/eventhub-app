@@ -82,7 +82,7 @@ class TaskServiceTest {
 
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            taskService.createTask(10L, request);
+            taskService.createTask(10L, request, loggedUser);
         });
 
 
@@ -100,7 +100,7 @@ class TaskServiceTest {
 
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            taskService.updateTaskStatus(100L, request);
+            taskService.updateTaskStatus(100L, request, loggedUser);
         });
 
 

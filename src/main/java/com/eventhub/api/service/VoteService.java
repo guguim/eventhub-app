@@ -8,6 +8,7 @@ import com.eventhub.api.model.User;
 import com.eventhub.api.model.Vote;
 import com.eventhub.api.repository.VoteRepository;
 import com.eventhub.api.repository.UserRepository;
+import com.eventhub.api.repository.EventDateOptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Plus, User, Search, X } from 'lucide-react';
@@ -12,26 +13,17 @@ const SORT_OPTIONS = [
 ];
 
 const Dashboard = () => {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const fetchEvents = async () => {
-    try {
+  const { data: events = [], isLoading: loading } = useQuery({
+    queryKey: ['events'],
+    queryFn: async () => {
       const response = await axios.get('/api/events');
-      setEvents(response.data);
-    } catch (error) {
-      console.error("Erro ao buscar eventos", error);
-    } finally {
-      setLoading(false);
+      return response.data;
     }
-  };
+  });
 
   // Filtra e ordena os eventos baseado na busca e no sort
   const filteredEvents = useMemo(() => {

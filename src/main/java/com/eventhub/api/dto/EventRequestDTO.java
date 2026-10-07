@@ -13,7 +13,5 @@ public record EventRequestDTO(
 
         String location,
 
-        @NotNull(message = "O ID do organizador é obrigatório") Long organizerId,
-
         @NotNull(message = "As opções de datas não podem ser nulas") @Size(min = 1, message = "O evento deve ter pelo menos uma opção de data para votação") List<LocalDateTime> dateOptions) {
 }

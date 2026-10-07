@@ -55,7 +55,7 @@ class EventServiceTest {
         User mockUser = new User(organizerId, "João", "joao@email.com", "senha123", Role.ORGANIZER);
 
         EventRequestDTO requestDTO = new EventRequestDTO(
-                "Churrasco", "Churras de fim de ano", "Casa do João", organizerId, List.of(LocalDateTime.now())
+                "Churrasco", "Churras de fim de ano", "Casa do João", List.of(LocalDateTime.now())
         );
 
         Event mockSavedEvent = new Event(10L, "Churrasco", "Churras de fim de ano", "Casa do João", mockUser, new ArrayList<>());
@@ -66,7 +66,7 @@ class EventServiceTest {
         when(userRepository.findAll()).thenReturn(List.of(mockUser)); 
 
 
-        EventResponseDTO response = eventService.createEvent(requestDTO);
+        EventResponseDTO response = eventService.createEvent(requestDTO, mockUser);
 
 
         assertNotNull(response);
@@ -83,7 +83,7 @@ class EventServiceTest {
     void createEvent_OrganizerNotFound() {
 
         EventRequestDTO requestDTO = new EventRequestDTO(
-                "Churrasco", "Churras de fim de ano", "Casa do João", 999L, List.of(LocalDateTime.now())
+                "Churrasco", "Churras de fim de ano", "Casa do João", List.of(LocalDateTime.now())
         );
 
 
@@ -91,7 +91,8 @@ class EventServiceTest {
 
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            eventService.createEvent(requestDTO);
+        User mockUser = new User(999L, "Inexistente", "none@email.com", "senha123", Role.ORGANIZER);
+            eventService.createEvent(requestDTO, mockUser);
         });
 
         assertEquals("Organizador não encontrado", exception.getMessage());

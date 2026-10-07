@@ -36,10 +36,10 @@ public class EventService {
 
 
     @Transactional
-    public EventResponseDTO createEvent(EventRequestDTO requestDTO) {
+    public EventResponseDTO createEvent(EventRequestDTO requestDTO, User authenticatedUser) {
 
 
-        User organizer = userRepository.findById(requestDTO.organizerId())
+        User organizer = userRepository.findById(authenticatedUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Organizador não encontrado"));
 
 

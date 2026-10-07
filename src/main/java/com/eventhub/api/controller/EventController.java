@@ -21,8 +21,10 @@ public class EventController {
     private final EventService eventService;
 
     @PostMapping
-    public ResponseEntity<EventResponseDTO> createEvent(@Valid @RequestBody EventRequestDTO requestDTO) {
-        EventResponseDTO response = eventService.createEvent(requestDTO);
+    public ResponseEntity<EventResponseDTO> createEvent(
+            @Valid @RequestBody EventRequestDTO requestDTO, 
+            @AuthenticationPrincipal User user) {
+        EventResponseDTO response = eventService.createEvent(requestDTO, user);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

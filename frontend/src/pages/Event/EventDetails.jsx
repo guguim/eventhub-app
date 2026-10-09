@@ -72,19 +72,57 @@ const EventDetails = () => {
   };
 
   const handleVote = async (dateOptionId) => {
+    // Atualização otimista da interface
+    setEvent(prevEvent => ({
+      ...prevEvent,
+      dateOptions: prevEvent.dateOptions.map(date => 
+        date.id === dateOptionId 
+          ? { ...date, voted: true, voteCount: date.voteCount + 1 } 
+          : date
+      )
+    }));
+
     try {
       await axios.post(`/api/dates/${dateOptionId}/vote`);
       toast.success('Voto registrado com sucesso!');
     } catch (e) {
+      // Reverte se falhar
+      setEvent(prevEvent => ({
+        ...prevEvent,
+        dateOptions: prevEvent.dateOptions.map(date => 
+          date.id === dateOptionId 
+            ? { ...date, voted: false, voteCount: Math.max(0, date.voteCount - 1) } 
+            : date
+        )
+      }));
       toast.warning('Você já votou nesta data!');
     }
   };
 
   const handleRemoveVote = async (dateOptionId) => {
+    // Atualização otimista da interface
+    setEvent(prevEvent => ({
+      ...prevEvent,
+      dateOptions: prevEvent.dateOptions.map(date => 
+        date.id === dateOptionId 
+          ? { ...date, voted: false, voteCount: Math.max(0, date.voteCount - 1) } 
+          : date
+      )
+    }));
+
     try {
       await axios.delete(`/api/dates/${dateOptionId}/vote`);
       toast.success('Voto removido com sucesso!');
     } catch (e) {
+      // Reverte se falhar
+      setEvent(prevEvent => ({
+        ...prevEvent,
+        dateOptions: prevEvent.dateOptions.map(date => 
+          date.id === dateOptionId 
+            ? { ...date, voted: true, voteCount: date.voteCount + 1 } 
+            : date
+        )
+      }));
       toast.error('Erro ao remover voto.');
     }
   };

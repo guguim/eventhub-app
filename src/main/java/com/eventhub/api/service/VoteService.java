@@ -53,6 +53,8 @@ public class VoteService {
         messagingTemplate.convertAndSend("/topic/events/" + dateOption.getEvent().getId() + "/votes", responseDTO);
 
         return responseDTO;
+    }
+
     @Transactional
     public VoteResponseDTO removeVote(Long dateOptionId, User authenticatedUser) {
         EventDateOption dateOption = dateOptionRepository.findById(dateOptionId)

@@ -82,6 +82,15 @@ function App() {
               } 
             />
 
+            <Route 
+              path="/perfil" 
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } 
+            />
+
             {/* 404 - Catch All */}
             <Route path="*" element={<NotFound />} />
 

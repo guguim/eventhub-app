@@ -21,6 +21,8 @@ public class VoteController {
     public ResponseEntity<VoteResponseDTO> voteForDate(@PathVariable Long dateId, @AuthenticationPrincipal User user) {
         VoteResponseDTO response = voteService.castVote(dateId, user);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
     @DeleteMapping("/{dateId}/vote")
     public ResponseEntity<VoteResponseDTO> removeVote(@PathVariable Long dateId, @AuthenticationPrincipal User user) {
         VoteResponseDTO response = voteService.removeVote(dateId, user);

@@ -54,4 +54,10 @@ public class TaskController {
     public ResponseEntity<TaskResponseDTO> unassignTask(@PathVariable Long taskId, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(taskService.unassignTask(taskId, user));
     }
+
+    @DeleteMapping("/tasks/{taskId}")
+    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId, @AuthenticationPrincipal User user) {
+        taskService.deleteTask(taskId, user);
+        return ResponseEntity.noContent().build();
+    }
 }

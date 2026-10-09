@@ -94,7 +94,7 @@ const EventDetails = () => {
       const newStatus = task.status === 'PENDING' ? 'COMPLETED' : 'PENDING';
       await axios.patch(`/api/tasks/${task.id}/status`, { status: newStatus });
     } catch (e) {
-      toast.error('Apenas o responsável pela tarefa pode alterar o status.', 'Acesso Negado');
+      toast.error('Acesso negado ao alterar status da tarefa.');
     }
   };
 
@@ -129,6 +129,17 @@ const EventDetails = () => {
       toast.success('Tarefa liberada.');
     } catch (e) {
       toast.error(e.response?.data?.message || 'Erro ao liberar tarefa.');
+    }
+  };
+
+  const handleDeleteTask = async (taskId, e) => {
+    e.stopPropagation();
+    try {
+      await axios.delete(`/api/tasks/${taskId}`);
+      fetchEventData();
+      toast.success('Tarefa excluída com sucesso!');
+    } catch (e) {
+      toast.error('Erro ao excluir tarefa.');
     }
   };
 
@@ -316,6 +327,15 @@ const EventDetails = () => {
                       style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                     >
                       <UserMinus size={14} /> Liberar
+                    </button>
+                  )}
+                  {isOrganizer && (
+                    <button 
+                      onClick={(e) => handleDeleteTask(task.id, e)}
+                      style={{ background: 'none', border: 'none', color: 'var(--color-danger)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0.4rem' }}
+                      title="Excluir tarefa"
+                    >
+                      <Trash2 size={18} />
                     </button>
                   )}
                 </div>

@@ -73,8 +73,11 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada."));
 
 
-        if (task.getAssignee() == null || !task.getAssignee().getId().equals(loggedUser.getId())) {
-            throw new ForbiddenAccessException("Acesso negado: Somente o responsável pela tarefa pode alterar o seu status.");
+        boolean isOrganizer = task.getEvent().getOrganizer().getId().equals(loggedUser.getId());
+        boolean isAssignee = task.getAssignee() != null && task.getAssignee().getId().equals(loggedUser.getId());
+
+        if (!isOrganizer && !isAssignee) {
+            throw new ForbiddenAccessException("Acesso negado: Somente o organizador ou o responsável pela tarefa pode alterar o seu status.");
         }
 
         task.setStatus(request.status());
@@ -143,5 +146,17 @@ public class TaskService {
                 assigneeId,
                 assigneeName
         );
+    }
+
+    @Transactional
+    public void deleteTask(Long taskId, User loggedUser) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada."));
+
+        if (!task.getEvent().getOrganizer().getId().equals(loggedUser.getId())) {
+            throw new ForbiddenAccessException("Acesso negado: Somente o organizador do evento pode excluir tarefas.");
+        }
+
+        taskRepository.delete(task);
     }
 }

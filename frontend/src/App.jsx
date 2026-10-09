@@ -10,6 +10,7 @@ import Register from './pages/Auth/Register';
 import Dashboard from './pages/Dashboard/Dashboard';
 import EventDetails from './pages/Event/EventDetails';
 import CreateEvent from './pages/Event/CreateEvent';
+import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 
 // Layout que inclui a Navbar em páginas autenticadas
@@ -68,6 +69,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <CreateEvent />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/perfil" 
+              element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               } 
             />

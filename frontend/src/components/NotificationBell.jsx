@@ -68,9 +68,11 @@ const NotificationBell = () => {
       </button>
 
       {isOpen && (
-        <div className="glass-panel animate-fade-in" style={{ 
+        <div className="animate-fade-in" style={{ 
           position: 'absolute', top: '40px', right: '0', width: '320px', 
-          maxHeight: '400px', overflowY: 'auto', zIndex: 1000, padding: '1.5rem' 
+          maxHeight: '400px', overflowY: 'auto', zIndex: 1000, padding: '1.5rem',
+          background: 'var(--bg-main)', border: '1px solid var(--border-glass)', borderRadius: '12px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
         }}>
           <h3 style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.5rem' }}>Notificações</h3>
           {notifications.length === 0 ? (

@@ -6,7 +6,7 @@
 
 :root {
   /* Cores HSL para Fácil Manipulação */
-  --hue-primary: 250;
+  --hue-primary: 0;
   --color-primary: hsl(var(--hue-primary), 100%, 65%);
   --color-primary-hover: hsl(var(--hue-primary), 100%, 75%);
   --color-primary-subtle: hsla(var(--hue-primary), 100%, 65%, 0.15);
@@ -62,9 +62,6 @@ body {
   font-family: var(--font-body);
   background-color: var(--bg-dark);
   color: var(--text-main);
-  background-image: radial-gradient(circle at 15% 50%, hsla(250, 100%, 65%, 0.15), transparent 25%),
-                    radial-gradient(circle at 85% 30%, hsla(300, 100%, 65%, 0.15), transparent 25%);
-  background-attachment: fixed;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -362,7 +359,7 @@ body {
 }
 
 .navbar-brand span {
-  background: linear-gradient(135deg, var(--color-primary), hsl(300, 100%, 75%));
+  background: linear-gradient(135deg, var(--color-primary), hsl(30, 100%, 60%));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -378,7 +375,7 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), hsl(300, 100%, 70%));
+  background: linear-gradient(135deg, var(--color-primary), hsl(30, 100%, 60%));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -758,7 +755,7 @@ h3 {
 /* ========== UTILITIES ========== */
 
 .text-gradient {
-  background: linear-gradient(135deg, var(--color-primary), hsl(300, 100%, 75%));
+  background: linear-gradient(135deg, var(--color-primary), hsl(30, 100%, 60%));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

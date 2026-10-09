@@ -53,5 +53,21 @@ public class VoteService {
         messagingTemplate.convertAndSend("/topic/events/" + dateOption.getEvent().getId() + "/votes", responseDTO);
 
         return responseDTO;
+    @Transactional
+    public VoteResponseDTO removeVote(Long dateOptionId, User authenticatedUser) {
+        EventDateOption dateOption = dateOptionRepository.findById(dateOptionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Opção de data não encontrada."));
+
+        Vote vote = voteRepository.findByUserIdAndEventDateOptionId(authenticatedUser.getId(), dateOptionId)
+                .orElseThrow(() -> new BusinessRuleException("Você não votou nesta data!"));
+
+        voteRepository.delete(vote);
+
+        long totalVotes = voteRepository.countByEventDateOptionId(dateOptionId);
+        VoteResponseDTO responseDTO = new VoteResponseDTO(null, "Voto removido com sucesso!", totalVotes);
+
+        messagingTemplate.convertAndSend("/topic/events/" + dateOption.getEvent().getId() + "/votes", responseDTO);
+
+        return responseDTO;
     }
 }

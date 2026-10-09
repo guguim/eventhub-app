@@ -80,6 +80,15 @@ const EventDetails = () => {
     }
   };
 
+  const handleRemoveVote = async (dateOptionId) => {
+    try {
+      await axios.delete(`/api/dates/${dateOptionId}/vote`);
+      toast.success('Voto removido com sucesso!');
+    } catch (e) {
+      toast.error('Erro ao remover voto.');
+    }
+  };
+
   const toggleTaskStatus = async (task) => {
     try {
       const newStatus = task.status === 'PENDING' ? 'COMPLETED' : 'PENDING';
@@ -240,14 +249,14 @@ const EventDetails = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ color: 'var(--color-primary)', fontWeight: 'bold', fontSize: '1.2rem' }}>{date.voteCount} votos</span>
                   {date.voted ? (
-                    <span style={{ 
+                    <button onClick={() => handleRemoveVote(date.id)} style={{ 
                       display: 'flex', alignItems: 'center', gap: '0.4rem',
                       padding: '0.5rem 1rem', borderRadius: '6px',
                       background: 'hsla(150,60%,40%,0.2)', color: 'hsl(150,60%,60%)',
-                      fontWeight: '600', fontSize: '0.9rem'
+                      fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer', border: '1px solid hsla(150,60%,40%,0.3)'
                     }}>
-                      <CheckCircle size={16} /> Votado
-                    </span>
+                      <CheckCircle size={16} /> Votado (Remover)
+                    </button>
                   ) : (
                     <button className="btn-primary" onClick={() => handleVote(date.id)}>Votar</button>
                   )}

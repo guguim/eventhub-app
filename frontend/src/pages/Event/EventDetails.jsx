@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Client } from '@stomp/stompjs';
-import { Calendar, MapPin, CheckCircle, Circle, User, UserPlus, UserMinus, Pencil, Trash2, Save, X } from 'lucide-react';
+import { Calendar, MapPin, CheckCircle, Circle, User, UserPlus, UserMinus, Pencil, Trash2, Save, X, Send, Check, Inbox } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../components/Toast';
 import Modal from '../../components/Modal';
@@ -13,6 +13,9 @@ const EventDetails = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [suggestionTitle, setSuggestionTitle] = useState('');
+  const [suggestionDescription, setSuggestionDescription] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
@@ -33,12 +36,14 @@ const EventDetails = () => {
 
   const fetchEventData = async () => {
     try {
-      const [eventRes, tasksRes] = await Promise.all([
+      const [eventRes, tasksRes, suggestionsRes] = await Promise.all([
         axios.get(`/api/events/${id}`),
-        axios.get(`/api/events/${id}/tasks`)
+        axios.get(`/api/events/${id}/tasks`),
+        axios.get(`/api/events/${id}/task-suggestions`)
       ]);
       setEvent(eventRes.data);
       setTasks(tasksRes.data);
+      setSuggestions(suggestionsRes.data);
     } catch (error) {
       console.error("Erro ao buscar detalhes", error);
       toast.error('Evento não encontrado ou servidor indisponível.');
@@ -58,6 +63,10 @@ const EventDetails = () => {
         client.subscribe(`/topic/events/${id}/votes`, (message) => {
           console.log("Alguém votou! Recarregando dados...");
           fetchEventData(); 
+        });
+
+        client.subscribe(`/topic/events/${id}/suggestions`, () => {
+          fetchEventData();
         });
 
         client.subscribe(`/topic/events/${id}/tasks`, (message) => {
@@ -147,6 +156,46 @@ const EventDetails = () => {
       toast.error('Apenas o organizador pode adicionar tarefas.', 'Acesso Negado');
     }
   };
+
+  const handleSuggestTask = async (e) => {
+    e.preventDefault();
+    if (!suggestionTitle.trim()) return;
+    try {
+      await axios.post(`/api/events/${id}/task-suggestions`, {
+        title: suggestionTitle,
+        description: suggestionDescription || null
+      });
+      setSuggestionTitle('');
+      setSuggestionDescription('');
+      fetchEventData();
+      toast.success('Sugestão enviada ao organizador!');
+    } catch (e) {
+      toast.error(e.response?.data?.message || 'Erro ao enviar sugestão.');
+    }
+  };
+
+  const handleReviewSuggestion = async (suggestionId, action) => {
+    try {
+      await axios.post(`/api/task-suggestions/${suggestionId}/${action}`);
+      fetchEventData();
+      toast.success(action === 'approve' ? 'Sugestão aprovada! Tarefa criada no evento.' : 'Sugestão recusada.');
+    } catch (e) {
+      toast.error(e.response?.data?.message || 'Erro ao analisar sugestão.');
+    }
+  };
+
+  const handleCancelSuggestion = async (suggestionId) => {
+    try {
+      await axios.delete(`/api/task-suggestions/${suggestionId}`);
+      fetchEventData();
+      toast.success('Sugestão cancelada.');
+    } catch (e) {
+      toast.error(e.response?.data?.message || 'Erro ao cancelar sugestão.');
+    }
+  };
+
+  const statusLabel = { PENDING: 'Pendente', APPROVED: 'Aprovada', REJECTED: 'Recusada' };
+  const statusColor = { PENDING: 'hsl(40,90%,60%)', APPROVED: 'hsl(150,60%,60%)', REJECTED: 'var(--color-danger)' };
 
   const handleAssignTask = async (taskId, e) => {
     e.stopPropagation();
@@ -321,16 +370,40 @@ const EventDetails = () => {
             <CheckCircle size={24} /> Checklist de Tarefas
           </h2>
 
-          <form onSubmit={handleCreateTask} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-            <input 
-              type="text" 
-              placeholder="Adicionar nova tarefa..." 
-              value={newTaskTitle}
-              onChange={(e) => setNewTaskTitle(e.target.value)}
-              style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'hsla(0,0%,0%,0.2)', color: 'var(--text-main)' }}
-            />
-            <button type="submit" className="btn-primary" style={{ padding: '0.75rem 1rem' }}>Adicionar</button>
-          </form>
+          {isOrganizer ? (
+            <form onSubmit={handleCreateTask} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              <input 
+                type="text" 
+                placeholder="Adicionar nova tarefa..." 
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'hsla(0,0%,0%,0.2)', color: 'var(--text-main)' }}
+              />
+              <button type="submit" className="btn-primary" style={{ padding: '0.75rem 1rem' }}>Adicionar</button>
+            </form>
+          ) : (
+            <form onSubmit={handleSuggestTask} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              <input
+                type="text"
+                placeholder="Sugerir uma tarefa ao organizador..."
+                value={suggestionTitle}
+                onChange={(e) => setSuggestionTitle(e.target.value)}
+                style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'hsla(0,0%,0%,0.2)', color: 'var(--text-main)' }}
+              />
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  type="text"
+                  placeholder="Descrição (opcional)"
+                  value={suggestionDescription}
+                  onChange={(e) => setSuggestionDescription(e.target.value)}
+                  style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'hsla(0,0%,0%,0.2)', color: 'var(--text-main)' }}
+                />
+                <button type="submit" className="btn-primary" style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Send size={14} /> Sugerir
+                </button>
+              </div>
+            </form>
+          )}
 
           {tasks.length === 0 ? (
             <p style={{ color: 'var(--text-muted)' }}>Nenhuma tarefa cadastrada ainda.</p>
@@ -382,6 +455,43 @@ const EventDetails = () => {
           )}
         </div>
       </div>
+
+      {suggestions.length > 0 && (
+        <div className="glass-panel" style={{ padding: '2rem', marginTop: '2rem' }}>
+          <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Inbox size={24} /> {isOrganizer ? 'Sugestões de Tarefas' : 'Minhas Sugestões'}
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {suggestions.map(s => (
+              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', background: 'hsla(0,0%,0%,0.2)', borderRadius: '8px' }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontWeight: '600', fontSize: '1.1rem' }}>{s.title}</p>
+                  {s.description && <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{s.description}</p>}
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                    {isOrganizer && <>Sugerida por <strong>{s.requesterName}</strong> · </>}
+                    <span style={{ color: statusColor[s.status], fontWeight: 600 }}>{statusLabel[s.status]}</span>
+                  </p>
+                </div>
+                {s.status === 'PENDING' && isOrganizer && (
+                  <>
+                    <button className="btn-primary" onClick={() => handleReviewSuggestion(s.id, 'approve')} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <Check size={14} /> Aceitar
+                    </button>
+                    <button className="btn-glass" onClick={() => handleReviewSuggestion(s.id, 'reject')} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--color-danger)' }}>
+                      <X size={14} /> Recusar
+                    </button>
+                  </>
+                )}
+                {s.status === 'PENDING' && !isOrganizer && (
+                  <button className="btn-glass" onClick={() => handleCancelSuggestion(s.id)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                    Cancelar
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <Modal
         isOpen={showDeleteModal}

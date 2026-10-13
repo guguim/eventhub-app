@@ -11,6 +11,7 @@ import com.eventhub.api.model.User;
 import com.eventhub.api.repository.EventRepository;
 import com.eventhub.api.repository.UserRepository;
 import com.eventhub.api.repository.VoteRepository;
+import com.eventhub.api.repository.TaskSuggestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ public class EventService {
     private final NotificationService notificationService;
     private final EmailService emailService;
     private final VoteRepository voteRepository;
+    private final TaskSuggestionRepository taskSuggestionRepository;
 
 
 
@@ -122,6 +124,7 @@ public class EventService {
             throw new ForbiddenAccessException("Apenas o organizador pode excluir este evento.");
         }
 
+        taskSuggestionRepository.deleteByEventId(id);
         eventRepository.delete(event);
     }
 

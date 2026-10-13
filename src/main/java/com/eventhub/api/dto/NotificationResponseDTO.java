@@ -6,5 +6,6 @@ public record NotificationResponseDTO(
     Long id,
     String message,
     boolean isRead,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    Long eventId
 ) {}

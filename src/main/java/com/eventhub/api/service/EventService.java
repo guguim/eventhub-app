@@ -66,6 +66,7 @@ public class EventService {
         Event savedEvent = eventRepository.save(event);
 
         notificationService.notifyNewEventAsync(
+                savedEvent.getId(),
                 savedEvent.getTitle(),
                 savedEvent.getDescription(),
                 organizer.getId(),

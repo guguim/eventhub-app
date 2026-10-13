@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -8,6 +9,7 @@ const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -51,6 +53,14 @@ const NotificationBell = () => {
     }
   };
 
+  const handleNotificationClick = async (n) => {
+    if (!n.isRead) await markAsRead(n.id);
+    if (n.eventId) {
+      setIsOpen(false);
+      navigate(`/eventos/${n.eventId}`);
+    }
+  };
+
   return (
     <div style={{ position: 'relative' }}>
       <button onClick={openDropdown} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center' }}>
@@ -79,14 +89,15 @@ const NotificationBell = () => {
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center' }}>Nenhum aviso no momento.</p>
           ) : (
             notifications.map(n => (
-              <div key={n.id} style={{ 
+              <div key={n.id} onClick={() => handleNotificationClick(n)} style={{ 
                 padding: '1rem', marginBottom: '1rem', borderRadius: '8px',
+                cursor: n.eventId ? 'pointer' : 'default',
                 background: n.isRead ? 'hsla(0, 0%, 0%, 0.1)' : 'hsla(var(--hue-primary), 100%, 65%, 0.15)',
                 border: '1px solid var(--border-glass)', transition: 'all 0.3s'
               }}>
                 <p style={{ fontSize: '0.95rem', marginBottom: '0.5rem', color: n.isRead ? 'var(--text-muted)' : 'var(--text-main)' }}>{n.message}</p>
                 {!n.isRead && (
-                  <button onClick={() => markAsRead(n.id)} style={{ 
+                  <button onClick={(e) => { e.stopPropagation(); markAsRead(n.id); }} style={{ 
                     background: 'none', border: 'none', color: 'var(--color-primary)', 
                     fontSize: '0.8rem', cursor: 'pointer', fontWeight: '600', padding: 0 
                   }}>

@@ -32,6 +32,9 @@ public class Notification {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /** Evento relacionado (opcional); usado para redirecionar ao clicar na notificação. */
+    private Long eventId;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

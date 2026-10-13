@@ -60,7 +60,8 @@ public class TaskSuggestionService {
         TaskSuggestion saved = suggestionRepository.save(suggestion);
 
         notificationService.createNotification(event.getOrganizer(),
-                requester.getName() + " sugeriu a tarefa \"" + saved.getTitle() + "\" no evento \"" + event.getTitle() + "\".");
+                requester.getName() + " sugeriu a tarefa \"" + saved.getTitle() + "\" no evento \"" + event.getTitle() + "\".",
+                eventId);
         broadcast(eventId);
 
         return mapToDTO(saved);
@@ -96,7 +97,8 @@ public class TaskSuggestionService {
 
         notificationService.createNotification(suggestion.getRequester(),
                 "Sua sugestão \"" + suggestion.getTitle() + "\" foi aprovada no evento \""
-                        + suggestion.getEvent().getTitle() + "\"!");
+                        + suggestion.getEvent().getTitle() + "\"!",
+                suggestion.getEvent().getId());
 
         broadcast(suggestion.getEvent().getId());
 
@@ -115,7 +117,8 @@ public class TaskSuggestionService {
 
         notificationService.createNotification(suggestion.getRequester(),
                 "Sua sugestão \"" + suggestion.getTitle() + "\" foi recusada no evento \""
-                        + suggestion.getEvent().getTitle() + "\".");
+                        + suggestion.getEvent().getTitle() + "\".",
+                suggestion.getEvent().getId());
 
         broadcast(suggestion.getEvent().getId());
         return mapToDTO(saved);

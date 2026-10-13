@@ -74,7 +74,7 @@ class EventServiceTest {
         verify(userRepository, times(1)).findById(organizerId);
         verify(eventRepository, times(1)).save(any(Event.class));
         verify(notificationService, times(1)).notifyNewEventAsync(
-                anyString(), anyString(), eq(organizerId), anyString()
+                eq(10L), anyString(), anyString(), eq(organizerId), anyString()
         );
     }
 

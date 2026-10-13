@@ -30,19 +30,21 @@ public class NotificationService {
 
 
     @Transactional
-    public void createNotification(User user, String message) {
+    public void createNotification(User user, String message, Long eventId) {
         Notification notification = new Notification();
         notification.setUser(user);
         notification.setMessage(message);
+        notification.setEventId(eventId);
         notificationRepository.save(notification);
     }
 
     @Transactional
-    public void createNotifications(List<User> users, String message) {
+    public void createNotifications(List<User> users, String message, Long eventId) {
         List<Notification> notifications = users.stream().map(user -> {
             Notification notification = new Notification();
             notification.setUser(user);
             notification.setMessage(message);
+            notification.setEventId(eventId);
             return notification;
         }).collect(Collectors.toList());
         notificationRepository.saveAll(notifications);
@@ -50,7 +52,7 @@ public class NotificationService {
 
     @Async
     @Transactional
-    public void notifyNewEventAsync(String eventTitle, String eventDescription, Long organizerId, String organizerName) {
+    public void notifyNewEventAsync(Long eventId, String eventTitle, String eventDescription, Long organizerId, String organizerName) {
         int page = 0;
         int size = 100;
         Page<User> userPage;
@@ -60,7 +62,7 @@ public class NotificationService {
             userPage = userRepository.findByIdNot(organizerId, PageRequest.of(page, size));
             List<User> users = userPage.getContent();
             if (!users.isEmpty()) {
-                createNotifications(users, message);
+                createNotifications(users, message, eventId);
                 for (User user : users) {
                     emailService.sendSimpleEmail(
                             user.getEmail(),
@@ -77,7 +79,7 @@ public class NotificationService {
     public List<NotificationResponseDTO> getMyNotifications(User loggedUser) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(loggedUser.getId())
                 .stream()
-                .map(n -> new NotificationResponseDTO(n.getId(), n.getMessage(), n.isRead(), n.getCreatedAt()))
+                .map(n -> new NotificationResponseDTO(n.getId(), n.getMessage(), n.isRead(), n.getCreatedAt(), n.getEventId()))
                 .collect(Collectors.toList());
     }
 

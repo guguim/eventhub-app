@@ -12,7 +12,7 @@ O EventHub é um sistema robusto e completo para **planejamento colaborativo de 
 
 ---
 
-## 🏗️ Arquitetura e Pontos Fortes do Código (Backend)
+## 🏗️ Arquitetura e Segurança (Backend)
 
 O núcleo do sistema foi desenhado visando performance, manutenibilidade e segurança:
 
